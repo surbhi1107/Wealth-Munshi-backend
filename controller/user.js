@@ -50,6 +50,7 @@ const register = async (req, res, next) => {
             .status(400)
             .send({ success, error: "Something went wrong." });
         }
+        //sending welcome mail to user
         let link = "http://localhost:3000";
         var transporter = nodemailer.createTransport({
           service: "gmail",
@@ -121,6 +122,7 @@ const register = async (req, res, next) => {
             console.log("Email sent: ", info.rejected);
             return res.status(400).send("mail not send.");
           } else {
+            // create authentication token
             const authToken = jwt.sign(
               { _id: user?._id, email: email },
               process.env.SECRET_KEY
@@ -148,6 +150,7 @@ const login = async (req, res, next) => {
       if (!user) {
         return res.status(400).send({ success, error: "User not found" });
       }
+      // bcrypt password and compare password
       const passComp = await bcrypt.compare(password, user?.password ?? "");
       if (!passComp) {
         return res.status(400).send({
@@ -155,6 +158,7 @@ const login = async (req, res, next) => {
           error: "Please try to login with correct credentials",
         });
       }
+      // create authentication token
       const authToken = jwt.sign(
         { _id: user?._id, email: email },
         process.env.SECRET_KEY
@@ -185,10 +189,12 @@ const sendemailLink = async (req, res, next) => {
     if (!user) {
       return res.status(400).send({ success, error: "User not found" });
     }
+    // create token for verify user
     const secretKey = user._id + process.env.SECRET_KEY;
     const forgotToken = jwt.sign({ _id: user._id }, secretKey, {
       expiresIn: "5m",
     });
+    //send forgot password mail to user
     let link = `${process.env.FORGOT_PASSWORD}/${user._id}/${forgotToken}`;
     var transporter = nodemailer.createTransport({
       service: "gmail",
@@ -278,12 +284,14 @@ const resetpassword = async (req, res, next) => {
     let success = false;
     if (newpassword && id && token) {
       const findUser = await User.findById(id);
+      // verify token which has been sent in mail as link
       const secretKey = findUser._id + process.env.SECRET_KEY;
       const isValid = await jwt.verify(token, secretKey);
       if (isValid) {
         // password hashing
         const salt = await bcrypt.genSalt(10);
         const hashedPass = await bcrypt.hash(newpassword, salt);
+        // store hased password
         const isSuccess = await User.findByIdAndUpdate(findUser._id, {
           $set: {
             password: hashedPass,
@@ -291,6 +299,7 @@ const resetpassword = async (req, res, next) => {
         });
         if (isSuccess) {
           success = true;
+          //send password changed mail to user
           var transporter = nodemailer.createTransport({
             service: "gmail",
             host: "smtp.gmail.email",
@@ -374,11 +383,13 @@ const resetpassword = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
+    // if token is expired
     if (
       error instanceof jwt.JsonWebTokenError &&
       error.message.includes("expired")
     ) {
       return res.status(500).json({ msg: "Token Expired" });
+      // if token is not valid
     } else if (
       error instanceof jwt.JsonWebTokenError &&
       error.message.includes("invalid signature")
@@ -440,7 +451,7 @@ const updateuser = async (req, res, next) => {
     let userId = req.user?._id;
     let success = false;
     const { userDetails } = req.body;
-    // let convertData = JSON.parse(userDetails);
+
     if (!userId) {
       return res.status(500).send({ success, error: "Something Wrong" });
     }
@@ -465,7 +476,7 @@ const updateuserbyadmin = async (req, res, next) => {
     let userId = req.body?._id;
     let success = false;
     const { userDetails } = req.body;
-    // let convertData = JSON.parse(userDetails);
+
     if (!userId) {
       return res
         .status(500)
