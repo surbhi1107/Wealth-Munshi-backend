@@ -31,3 +31,8 @@ To run the backend server on your local machine, follow these steps:
 
    -1 -> user
    1 -> admin
+
+   # gender value
+
+   -1 -> male
+   1 -> female

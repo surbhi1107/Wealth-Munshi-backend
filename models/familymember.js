@@ -54,7 +54,7 @@ var familymemberSchema = new Schema(
       trim: true,
       require: false,
     },
-    user: {
+    user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
     },
