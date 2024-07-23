@@ -1,41 +1,41 @@
-const Familymember = require("../models/familymember");
+const Goal = require("../models/goal");
 
-const addmember = async (req, res, next) => {
+const addgoal = async (req, res, next) => {
   try {
     let {
       type,
-      title,
-      fname,
-      mname,
-      lname,
-      gender,
-      known_as,
-      dob,
-      age_retire,
-      life_expectancy,
+      name,
+      inflation,
+      is_longterm_goal,
+      start_time,
+      end_time,
+      priority,
+      timeline_desc,
+      goal_often,
+      user_recommended,
     } = req?.body;
     let success = false;
-    if (fname && lname) {
-      let member = await Familymember.create({
+    if (type && start_time && end_time) {
+      let goal = await Goal.create({
         type,
-        title,
-        fname,
-        mname,
-        lname,
-        gender,
-        known_as,
-        dob,
-        age_retire,
-        life_expectancy,
+        name,
+        inflation,
+        is_longterm_goal,
+        start_time,
+        end_time,
+        priority,
         user_id: req.user._id,
+        user_recommended,
+        timeline_desc,
+        goal_often,
       });
-      if (!member?._id) {
+      if (!goal?._id) {
         return res
           .status(400)
           .send({ success, error: "Something went wrong." });
       }
       success = true;
-      return res.send({ success, data: member });
+      return res.send({ success, data: goal });
     } else {
       return res.status(500).send("All fields are required");
     }
@@ -45,45 +45,53 @@ const addmember = async (req, res, next) => {
   }
 };
 
-const getmemberbyid = async (req, res, next) => {
+const getgoalbyid = async (req, res, next) => {
   try {
-    let memberId = req.body?.memberId;
+    let goalId = req.body?.goalId;
     let success = false;
-    if (!memberId) {
+    if (!goalId) {
       return res
         .status(500)
         .send({ success, error: "All fields are required" });
     }
-    let member = await Familymember.findOne({
-      $and: [{ _id: memberId }, { user_id: req.user?._id }],
-    });
-    if (!member) {
+    let goal = await Goal.aggregate([
+      { $and: [{ _id: goalId }, { user_id: req.user?._id }] },
+      {
+        $lookup: {
+          from: "familymember",
+          localField: "user_recommended",
+          foreignField: "_id",
+          as: "user_recommended",
+        },
+      },
+    ]);
+    if (!goal) {
       return res.status(400).send({ success, error: "Data not found" });
     }
     success = true;
-    return res.send({ success, data: member });
+    return res.send({ success, data: goal?.[0] ?? {} });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send("Internal server error");
   }
 };
 
-const updatemember = async (req, res, next) => {
+const updategoal = async (req, res, next) => {
   try {
-    let memberId = req.body?.memberId;
+    let goalId = req.body?.goalId;
     let success = false;
     let { details } = req.body;
-    if (!memberId || !details) {
+    if (!goalId || !details) {
       return res
         .status(500)
         .send({ success, error: "All fields are required" });
     }
     details = { ...details, user_id: req.user._id };
-    const member = await Familymember.findOne({
-      $and: [{ _id: memberId }, { user_id: req.user?._id }],
+    const goal = await Goal.findOne({
+      $and: [{ _id: goalId }, { user_id: req.user?._id }],
     });
-    if (member) {
-      await Familymember.findByIdAndUpdate(memberId, {
+    if (goal) {
+      await goal.findByIdAndUpdate(goalId, {
         $set: details,
       });
       success = true;
@@ -97,17 +105,17 @@ const updatemember = async (req, res, next) => {
   }
 };
 
-const deletemember = async (req, res, next) => {
+const deletegoal = async (req, res, next) => {
   try {
-    const memberId = req.body?.memberId;
+    const goalId = req.body?.goalId;
     let success = false;
-    const findmember = Familymember.findOne({
-      $and: [{ _id: memberId }, { user_id: req.user?._id }],
+    const findGoal = await Goal.findOne({
+      $and: [{ _id: goalId }, { user_id: req.user?._id }],
     });
-    if (!findmember) {
+    if (!findGoal) {
       return res.status(400).send({ success, msg: "Data Not Found" });
     }
-    let deleted = await Familymember.findByIdAndDelete(memberId);
+    let deleted = await Goal.findByIdAndDelete(goalId);
     if (!deleted?._id) {
       success = false;
       return res.status(500).send({ success, msg: "delete unsuccessfully" });
@@ -120,11 +128,19 @@ const deletemember = async (req, res, next) => {
   }
 };
 
-const getallmembers = async (req, res, next) => {
+const getallgoals = async (req, res, next) => {
   try {
-    let data = await Familymember.find({
-      $and: [{ user_id: req.user?._id }, { type: { $ne: "self" } }],
-    });
+    let data = await Goal.aggregate([
+      { $match: { user_id: req.user._id } },
+      {
+        $lookup: {
+          from: "familymember",
+          localField: "user_recommended",
+          foreignField: "_id",
+          as: "user_recommended",
+        },
+      },
+    ]);
     return res.send({ data });
   } catch (error) {
     console.log("error", error);
@@ -133,9 +149,9 @@ const getallmembers = async (req, res, next) => {
 };
 
 module.exports = {
-  addmember,
-  updatemember,
-  getmemberbyid,
-  deletemember,
-  getallmembers,
+  addgoal,
+  getgoalbyid,
+  updategoal,
+  deletegoal,
+  getallgoals,
 };

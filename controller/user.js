@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const nodemailer = require("nodemailer");
+const Familymember = require("../models/familymember");
 
 const register = async (req, res, next) => {
   try {
@@ -50,6 +51,18 @@ const register = async (req, res, next) => {
             .status(400)
             .send({ success, error: "Something went wrong." });
         }
+        // save user as member in familymember collection
+        let member = await Familymember.create({
+          type: "self",
+          fname,
+          lname,
+          known_as: `${fname} ${lname}`,
+          dob,
+          age_retire,
+          life_expectancy,
+          user_id: user?._id,
+        });
+        console.log(member);
         //sending welcome mail to user
         let link = "http://localhost:3000";
         var transporter = nodemailer.createTransport({
