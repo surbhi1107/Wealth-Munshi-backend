@@ -16,6 +16,10 @@ var goalSchema = new Schema(
       trim: true,
       required: false,
     },
+    amount: {
+      type: Number,
+      required: false,
+    },
     inflation: {
       type: String,
       trim: true,

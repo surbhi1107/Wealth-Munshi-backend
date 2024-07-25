@@ -1,3 +1,4 @@
+const { mongoose } = require("mongoose");
 const Goal = require("../models/goal");
 
 const addgoal = async (req, res, next) => {
@@ -5,6 +6,7 @@ const addgoal = async (req, res, next) => {
     let {
       type,
       name,
+      amount,
       inflation,
       is_longterm_goal,
       start_time,
@@ -15,10 +17,11 @@ const addgoal = async (req, res, next) => {
       user_recommended,
     } = req?.body;
     let success = false;
-    if (type && start_time && end_time) {
+    if (type && start_time && amount) {
       let goal = await Goal.create({
         type,
         name,
+        amount,
         inflation,
         is_longterm_goal,
         start_time,
@@ -54,14 +57,22 @@ const getgoalbyid = async (req, res, next) => {
         .status(500)
         .send({ success, error: "All fields are required" });
     }
+    goalId = new mongoose.Types.ObjectId(goalId);
     let goal = await Goal.aggregate([
-      { $and: [{ _id: goalId }, { user_id: req.user?._id }] },
+      { $match: { $and: [{ _id: goalId }, { user_id: req.user?._id }] } },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "user_recommended",
           foreignField: "_id",
           as: "user_recommended",
+        },
+      },
+      {
+        $addFields: {
+          user_recommended: {
+            $first: "$user_recommended",
+          },
         },
       },
     ]);
@@ -91,7 +102,7 @@ const updategoal = async (req, res, next) => {
       $and: [{ _id: goalId }, { user_id: req.user?._id }],
     });
     if (goal) {
-      await goal.findByIdAndUpdate(goalId, {
+      await Goal.findByIdAndUpdate(goalId, {
         $set: details,
       });
       success = true;
@@ -134,10 +145,17 @@ const getallgoals = async (req, res, next) => {
       { $match: { user_id: req.user._id } },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "user_recommended",
           foreignField: "_id",
           as: "user_recommended",
+        },
+      },
+      {
+        $addFields: {
+          user_recommended: {
+            $first: "$user_recommended",
+          },
         },
       },
     ]);

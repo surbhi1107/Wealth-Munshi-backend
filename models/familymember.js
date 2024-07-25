@@ -45,13 +45,11 @@ var familymemberSchema = new Schema(
       require: false,
     },
     age_retire: {
-      type: String,
-      trim: true,
+      type: Number,
       require: false,
     },
     life_expectancy: {
-      type: String,
-      trim: true,
+      type: Number,
       require: false,
     },
     user_id: {

@@ -41,14 +41,17 @@ var UserSchema = new Schema(
       trim: true,
       require: false,
     },
+    phone_type: {
+      type: Number,
+      require: false,
+    },
     age_retire: {
-      type: String,
+      type: Number,
       trim: true,
       require: false,
     },
     life_expectancy: {
-      type: String,
-      trim: true,
+      type: Number,
       require: false,
     },
     password: {

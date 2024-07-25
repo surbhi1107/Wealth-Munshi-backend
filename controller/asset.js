@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Asset = require("../models/asset");
 
 const addasset = async (req, res, next) => {
@@ -27,7 +28,7 @@ const addasset = async (req, res, next) => {
         isAssest,
         timeline_desc,
         user_id: req.user?._id,
-        user_recommended,
+        ...(user_recommended?.length > 0 ? { user_recommended } : {}),
       });
       if (!asset?._id) {
         return res
@@ -54,11 +55,12 @@ const getassetbyid = async (req, res, next) => {
         .status(500)
         .send({ success, error: "All fields are required" });
     }
+    assetId = new mongoose.Types.ObjectId(assetId);
     let asset = await Asset.aggregate([
-      { $and: [{ _id: assetId }, { user_id: req.user?._id }] },
+      { $match: { $and: [{ _id: assetId }, { user_id: req.user?._id }] } },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "owner",
           foreignField: "_id",
           as: "owner",
@@ -66,14 +68,24 @@ const getassetbyid = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "user_recommended",
           foreignField: "_id",
           as: "user_recommended",
         },
       },
+      {
+        $addFields: {
+          user_recommended: {
+            $first: "$user_recommended",
+          },
+          owner: {
+            $first: "$owner",
+          },
+        },
+      },
     ]);
-    if (!asset) {
+    if (asset?.length === 0) {
       return res.status(400).send({ success, error: "Data not found" });
     }
     success = true;
@@ -142,40 +154,50 @@ const getallassets = async (req, res, next) => {
       { $match: { user_id: req.user._id } },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "owner",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "owner",
         },
       },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "user_recommended",
           foreignField: "_id",
           as: "user_recommended",
         },
       },
-      // Unwind the source
-      { $unwind: "$goals" },
-      // Do the lookup matching
       {
-        $lookup: {
-          from: "goal",
-          localField: "goal",
-          foreignField: "_id",
-          as: "goals",
+        $addFields: {
+          user_recommended: {
+            $first: "$user_recommended",
+          },
+          owner: {
+            $first: "$owner",
+          },
         },
       },
-      // Unwind the result arrays ( likely one or none )
-      { $unwind: "$goals" },
-      // Group back to arrays
-      {
-        $group: {
-          _id: "$_id",
-          goals: { $push: "$goals" },
-        },
-      },
+      // // Unwind the source
+      // { $unwind: "$goals" },
+      // // Do the lookup matching
+      // {
+      //   $lookup: {
+      //     from: "goals",
+      //     localField: "goal",
+      //     foreignField: "_id",
+      //     as: "goals",
+      //   },
+      // },
+      // // Unwind the result arrays ( likely one or none )
+      // // { $unwind: "$goals" },
+      // // Group back to arrays
+      // {
+      //   $group: {
+      //     _id: "$_id",
+      //     goals: { $push: "$goals" },
+      //   },
+      // },
     ]);
     return res.send({ data });
   } catch (error) {

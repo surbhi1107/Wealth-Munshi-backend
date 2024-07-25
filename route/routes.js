@@ -34,17 +34,31 @@ const {
   updatemember,
   deletemember,
 } = require("../controller/familymember");
+const {
+  addgoal,
+  getgoalbyid,
+  getallgoals,
+  updategoal,
+  deletegoal,
+} = require("../controller/goal");
+const {
+  addasset,
+  getassetbyid,
+  updateasset,
+  deleteasset,
+  getallassets,
+} = require("../controller/asset");
 const router = express.Router();
 
 router.post("/user/register", register);
 router.post("/user/login", login);
+router.post("/user/sendemailLink", sendemailLink);
+router.post("/user/forgot-password-reset/:id/:token", resetpassword);
 router.get("/user/user-details", authMiddleware, getuserdetails);
-router.post("/user/user-by-id", authMiddleware, getuserbyid);
+router.post("/user/user-by-id", adminMiddleware, getuserbyid);
 router.get("/user/get-all-users", adminMiddleware, getallusers);
 router.put("/user/update-user", authMiddleware, updateuser);
 router.put("/user/update-user-by-admin", adminMiddleware, updateuserbyadmin);
-router.post("/user/sendemailLink", sendemailLink);
-router.post("/user/forgot-password-reset/:id/:token", resetpassword);
 router.post("/user/delete", adminMiddleware, deleteuser);
 
 router.post("/partner/create", authMiddleware, addpartner);
@@ -61,8 +75,26 @@ router.post("/contact/delete", authMiddleware, deletecontact);
 
 router.post("/member/create", authMiddleware, addmember);
 router.post("/member/member-by-id", authMiddleware, getmemberbyid);
+router.post("/member/get-all-members", authMiddleware, getallmembers);
+router.put("/member/update-member", authMiddleware, updatemember);
+router.post("/member/delete", authMiddleware, deletemember);
+
+router.post("/member/create", authMiddleware, addmember);
+router.post("/member/member-by-id", authMiddleware, getmemberbyid);
 router.get("/member/get-all-members", authMiddleware, getallmembers);
 router.put("/member/update-member", authMiddleware, updatemember);
 router.post("/member/delete", authMiddleware, deletemember);
+
+router.post("/goal/create", authMiddleware, addgoal);
+router.post("/goal/goal-by-id", authMiddleware, getgoalbyid);
+router.get("/goal/get-all-goals", authMiddleware, getallgoals);
+router.put("/goal/update", authMiddleware, updategoal);
+router.post("/goal/delete", authMiddleware, deletegoal);
+
+router.post("/asset/create", authMiddleware, addasset);
+router.post("/asset/asset-by-id", authMiddleware, getassetbyid);
+router.get("/asset/get-all-assets", authMiddleware, getallassets);
+router.put("/asset/update", authMiddleware, updateasset);
+router.post("/asset/delete", authMiddleware, deleteasset);
 
 module.exports = router;

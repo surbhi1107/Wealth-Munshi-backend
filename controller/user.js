@@ -16,6 +16,7 @@ const register = async (req, res, next) => {
       currency,
       age_retire,
       life_expectancy,
+      phone_type,
     } = req?.body;
     let success = false;
     if (phone_number && email) {
@@ -45,6 +46,7 @@ const register = async (req, res, next) => {
           life_expectancy,
           password: secPass,
           role,
+          phone_type,
         });
         if (!user?._id) {
           return res
@@ -136,12 +138,16 @@ const register = async (req, res, next) => {
             return res.status(400).send("mail not send.");
           } else {
             // create authentication token
-            const authToken = jwt.sign(
-              { _id: user?._id, email: email },
-              process.env.SECRET_KEY
-            );
+            // const authToken = jwt.sign(
+            //   { _id: user?._id, email: email },
+            //   process.env.SECRET_KEY
+            // );
             success = true;
-            return res.send({ success, token: authToken });
+            // res.cookie("accessToken", authToken, {
+            //   httpOnly: true,
+            //   secure: true,
+            // });
+            return res.send({ success, msg: "Password sent to your mail." });
           }
         });
       }
@@ -156,6 +162,11 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
+    res.clearCookie("accessToken", {
+      httpOnly: false,
+      sameSite: "None",
+      secure: true,
+    });
     let { email, password } = req?.body;
     let success = false;
     if (email && password) {
@@ -177,7 +188,13 @@ const login = async (req, res, next) => {
         process.env.SECRET_KEY
       );
       success = true;
-      return res.send({ success, token: authToken });
+      res.cookie("access-token", authToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None", //cross-site cookie
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+      return res.send({ success, token: authToken, user: user });
     } else {
       return res
         .status(500)
@@ -208,7 +225,7 @@ const sendemailLink = async (req, res, next) => {
       expiresIn: "5m",
     });
     //send forgot password mail to user
-    let link = `${process.env.FORGOT_PASSWORD}/${user._id}/${forgotToken}`;
+    let link = `${process.env.RESET_PASSWORD_NEXT_URL}/${user._id}/${forgotToken}`;
     var transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.email",
@@ -386,13 +403,13 @@ const resetpassword = async (req, res, next) => {
             }
           });
         } else {
-          return res.status(400).json({ msg: "some thing went wrong" });
+          return res.status(400).json({ error: "some thing went wrong" });
         }
       } else {
-        return res.status(400).json({ msg: "Link has been expired" });
+        return res.status(400).json({ error: "Link has been expired" });
       }
     } else {
-      return res.status(400).json({ msg: "All fields are required" });
+      return res.status(400).json({ error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
@@ -401,13 +418,13 @@ const resetpassword = async (req, res, next) => {
       error instanceof jwt.JsonWebTokenError &&
       error.message.includes("expired")
     ) {
-      return res.status(500).json({ msg: "Token Expired" });
+      return res.status(500).json({ error: "Token Expired" });
       // if token is not valid
     } else if (
       error instanceof jwt.JsonWebTokenError &&
       error.message.includes("invalid signature")
     ) {
-      return res.status(500).json({ msg: "Token Invalid" });
+      return res.status(500).json({ error: "Token Invalid try again" });
     } else return res.status(500).send("Internal server error");
   }
 };

@@ -27,6 +27,12 @@ To run the backend server on your local machine, follow these steps:
    1 -> Couple
    2 -> Trust/Company
 
+   ## user collection client type value
+
+   1 -> Home
+   2 -> Work
+   3 -> Mobile
+
    ## user collection user role value
 
    -1 -> user

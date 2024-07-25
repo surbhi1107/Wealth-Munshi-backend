@@ -122,9 +122,14 @@ const deletemember = async (req, res, next) => {
 
 const getallmembers = async (req, res, next) => {
   try {
-    let data = await Familymember.find({
-      $and: [{ user_id: req.user?._id }, { type: { $ne: "self" } }],
-    });
+    let isDashboard = req.body?.is_dashboard ? true : false;
+    let condition = {};
+    if (isDashboard) {
+      condition = {
+        $and: [{ user_id: req.user?._id }, { type: { $ne: "self" } }],
+      };
+    }
+    let data = await Familymember.find({ ...condition });
     return res.send({ data });
   } catch (error) {
     console.log("error", error);

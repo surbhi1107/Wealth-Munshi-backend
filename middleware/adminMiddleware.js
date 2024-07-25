@@ -2,8 +2,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 const adminMiddleware = async (req, res, next) => {
-  // verify token which is sent as Authorization in headers
-  const token = req.header("Authorization");
+  // get token from cookies
+  const token = req.cookies?.["access-token"];
   if (!token) return res.status(401).json({ error: "Access denied" });
   try {
     // find user using token
