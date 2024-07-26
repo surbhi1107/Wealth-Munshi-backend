@@ -48,6 +48,7 @@ const {
   deleteasset,
   getallassets,
 } = require("../controller/asset");
+const { getdashboarddata } = require("../controller/dashboard");
 const router = express.Router();
 
 router.post("/user/register", register);
@@ -60,6 +61,7 @@ router.get("/user/get-all-users", adminMiddleware, getallusers);
 router.put("/user/update-user", authMiddleware, updateuser);
 router.put("/user/update-user-by-admin", adminMiddleware, updateuserbyadmin);
 router.post("/user/delete", adminMiddleware, deleteuser);
+router.get("/user/get-dashboard", authMiddleware, getdashboarddata);
 
 router.post("/partner/create", authMiddleware, addpartner);
 router.post("/partner/partner-by-id", authMiddleware, getpartnerbyid);

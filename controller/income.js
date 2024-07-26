@@ -43,7 +43,7 @@ const addincome = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -82,7 +82,7 @@ const getincomebyid = async (req, res, next) => {
     return res.send({ success, data: income?.[0] ?? {} });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -111,7 +111,7 @@ const updateincome = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -134,7 +134,7 @@ const deleteincome = async (req, res, next) => {
     return res.send({ success, msg: "delete successfully" });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -162,7 +162,7 @@ const getallincomes = async (req, res, next) => {
     return res.send({ data });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 

@@ -41,7 +41,7 @@ const addcontact = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -64,7 +64,7 @@ const getcontactbyid = async (req, res, next) => {
     return res.send({ success, data: contact });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -93,7 +93,7 @@ const updatecontact = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -116,17 +116,17 @@ const deletecontact = async (req, res, next) => {
     return res.send({ success, msg: "delete successfully" });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
 const getallcontacts = async (req, res, next) => {
   try {
-    let data = await Contact.aggregate([{ $match: { user_id: req.user._id } }]);
+    let data = await Contact.find({ user_id: req.user._id });
     return res.send({ data });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 

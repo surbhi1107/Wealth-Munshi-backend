@@ -39,7 +39,7 @@ const addpartner = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -62,7 +62,7 @@ const getpartnerbyid = async (req, res, next) => {
     return res.send({ success, data: partner });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -91,7 +91,7 @@ const updatepartner = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -114,7 +114,7 @@ const deletepartner = async (req, res, next) => {
     return res.send({ success, msg: "delete successfully" });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -124,7 +124,7 @@ const getallpartners = async (req, res, next) => {
     return res.send({ data });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 

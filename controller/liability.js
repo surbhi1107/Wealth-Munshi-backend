@@ -74,7 +74,7 @@ const addliability = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -105,7 +105,7 @@ const getliabilitybyid = async (req, res, next) => {
     return res.send({ success, data: liability?.[0] ?? {} });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -184,7 +184,7 @@ const updateliability = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -207,7 +207,7 @@ const deleteliability = async (req, res, next) => {
     return res.send({ success, msg: "delete successfully" });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -227,7 +227,7 @@ const getallliabilities = async (req, res, next) => {
     return res.send({ data });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 

@@ -41,7 +41,7 @@ const addmember = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -64,7 +64,7 @@ const getmemberbyid = async (req, res, next) => {
     return res.send({ success, data: member });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -93,7 +93,7 @@ const updatemember = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -116,24 +116,17 @@ const deletemember = async (req, res, next) => {
     return res.send({ success, msg: "delete successfully" });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
 const getallmembers = async (req, res, next) => {
   try {
-    let isDashboard = req.body?.is_dashboard ? true : false;
-    let condition = {};
-    if (isDashboard) {
-      condition = {
-        $and: [{ user_id: req.user?._id }, { type: { $ne: "self" } }],
-      };
-    }
-    let data = await Familymember.find({ ...condition });
+    let data = await Familymember.find({ user_id: req.user?._id });
     return res.send({ data });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 

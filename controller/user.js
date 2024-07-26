@@ -156,7 +156,7 @@ const register = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -202,7 +202,7 @@ const login = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -303,7 +303,7 @@ const sendemailLink = async (req, res, next) => {
     });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -425,7 +425,7 @@ const resetpassword = async (req, res, next) => {
       error.message.includes("invalid signature")
     ) {
       return res.status(500).json({ error: "Token Invalid try again" });
-    } else return res.status(500).send("Internal server error");
+    } else return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -441,7 +441,7 @@ const getuserdetails = async (req, res, next) => {
     return res.send({ success, user: user });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -462,7 +462,7 @@ const getuserbyid = async (req, res, next) => {
     return res.send({ success, user: user });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -472,7 +472,7 @@ const getallusers = async (req, res, next) => {
     return res.send({ data: user });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -497,7 +497,7 @@ const updateuser = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -524,7 +524,7 @@ const updateuserbyadmin = async (req, res, next) => {
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
@@ -545,7 +545,7 @@ const deleteuser = async (req, res, next) => {
     return res.send({ success, msg: "delete successfully" });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ error: "Internal server error" });
   }
 };
 
