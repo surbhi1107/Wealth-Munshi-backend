@@ -121,7 +121,7 @@ const register = async (req, res, next) => {
                 <p>URL: <a href=${link} target="_blank">https://sanghiconsultancy.omxsoft.com/Default.aspx?portalid=1&ctl=Login&username=vasoyasurbhi%40gmail.com&verificationcode=1-122524</a></p>
                 <p>Once you have logged in, please start entering your information as well as you can. Don't worry if you don't have exact figures for everything, once your overall picture is clear the details can be refined where necessary.</p>
                 <p>Kind Regards</p>
-                <p class="uppercase">Wealth Munish</p>
+                <p class="uppercase">Wealth Munshi</p>
                 <p>Wealth Munshi (Fintech Specializing in Financial, Wealth & Succession Analysis)</p> 
               </div>    
               </body>
