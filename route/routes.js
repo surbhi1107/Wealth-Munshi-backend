@@ -66,25 +66,19 @@ router.get("/user/get-dashboard", authMiddleware, getdashboarddata);
 router.post("/partner/create", authMiddleware, addpartner);
 router.post("/partner/partner-by-id", authMiddleware, getpartnerbyid);
 router.get("/partner/get-all-partners", authMiddleware, getallpartners);
-router.put("/partner/update-partner", authMiddleware, updatepartner);
+router.put("/partner/update", authMiddleware, updatepartner);
 router.post("/partner/delete", authMiddleware, deletepartner);
 
 router.post("/contact/create", authMiddleware, addcontact);
 router.post("/contact/contact-by-id", authMiddleware, getcontactbyid);
 router.get("/contact/get-all-contacts", authMiddleware, getallcontacts);
-router.put("/contact/update-contact", authMiddleware, updatecontact);
+router.put("/contact/update", authMiddleware, updatecontact);
 router.post("/contact/delete", authMiddleware, deletecontact);
 
 router.post("/member/create", authMiddleware, addmember);
 router.post("/member/member-by-id", authMiddleware, getmemberbyid);
 router.post("/member/get-all-members", authMiddleware, getallmembers);
-router.put("/member/update-member", authMiddleware, updatemember);
-router.post("/member/delete", authMiddleware, deletemember);
-
-router.post("/member/create", authMiddleware, addmember);
-router.post("/member/member-by-id", authMiddleware, getmemberbyid);
-router.get("/member/get-all-members", authMiddleware, getallmembers);
-router.put("/member/update-member", authMiddleware, updatemember);
+router.put("/member/update", authMiddleware, updatemember);
 router.post("/member/delete", authMiddleware, deletemember);
 
 router.post("/goal/create", authMiddleware, addgoal);

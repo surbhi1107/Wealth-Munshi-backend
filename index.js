@@ -30,6 +30,10 @@ const PORT = process.env.PORT || 8080;
 
 app.use("/", router);
 
+app.get("/", (req, res) => {
+  return res.send("Welcome to Wealth Munshi");
+});
+
 app.listen(PORT, () => {
   console.log(`Wealth Munshi listening at http://localhost:${PORT}`);
 });
