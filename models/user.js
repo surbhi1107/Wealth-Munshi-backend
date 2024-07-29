@@ -54,6 +54,10 @@ var UserSchema = new Schema(
       type: Number,
       require: false,
     },
+    trust_name: {
+      type: String,
+      require: false,
+    },
     password: {
       type: String,
       trim: true,
