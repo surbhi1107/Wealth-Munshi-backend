@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const Familymember = require("../models/familymember");
+const Partner = require("../models/partner");
 
 const register = async (req, res, next) => {
   try {
@@ -17,6 +18,7 @@ const register = async (req, res, next) => {
       age_retire,
       life_expectancy,
       phone_type,
+      partner_details,
     } = req?.body;
     let success = false;
     if (phone_number && email) {
@@ -53,6 +55,13 @@ const register = async (req, res, next) => {
             .status(400)
             .send({ success, error: "Something went wrong." });
         }
+        if (partner_details) {
+          let partner = await Partner.create({
+            ...partner_details,
+            user_id: user._id,
+          });
+          console.log("...", partner);
+        }
         // save user as member in familymember collection
         let member = await Familymember.create({
           type: "self",
@@ -66,7 +75,7 @@ const register = async (req, res, next) => {
         });
         console.log(member);
         //sending welcome mail to user
-        let link = "http://localhost:3000";
+        let link = "http://139.59.63.31/";
         var transporter = nodemailer.createTransport({
           service: "gmail",
           host: "smtp.gmail.email",
@@ -225,7 +234,7 @@ const sendemailLink = async (req, res, next) => {
       expiresIn: "5m",
     });
     //send forgot password mail to user
-    let link = `${process.env.RESET_PASSWORD_NEXT_URL}/${user._id}/${forgotToken}`;
+    let link = `http://139.59.63.31/reset-password/${user._id}/${forgotToken}`;
     var transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.email",
