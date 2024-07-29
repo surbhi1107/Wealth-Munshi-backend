@@ -181,7 +181,10 @@ const login = async (req, res, next) => {
     if (email && password) {
       let user = await User.findOne({ email: email });
       if (!user) {
-        return res.status(400).send({ success, error: "User not found" });
+        return res.status(400).send({
+          success,
+          error: "Your Email and Password incorrect. Please try again.",
+        });
       }
       // bcrypt password and compare password
       const passComp = await bcrypt.compare(password, user?.password ?? "");
@@ -226,7 +229,7 @@ const sendemailLink = async (req, res, next) => {
     }
     let user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(400).send({ success, error: "User not found" });
+      return res.status(400).send({ success, error: "Email not found." });
     }
     // create token for verify user
     const secretKey = user._id + process.env.SECRET_KEY;
