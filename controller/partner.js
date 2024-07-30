@@ -1,5 +1,6 @@
 const Familymember = require("../models/familymember");
 const Partner = require("../models/partner");
+const Question = require("../models/question");
 
 const addpartner = async (req, res, next) => {
   try {
@@ -16,6 +17,34 @@ const addpartner = async (req, res, next) => {
     } = req?.body;
     let success = false;
     if (fname && lname) {
+      //add question to partner collection
+      let findquestions = await Question.find()
+        .select("-createdAt")
+        .select("-updatedAt");
+      let newquestion = [];
+      findquestions.map((v) => {
+        let newobj = {
+          _id: v._id,
+          type: v.type,
+          question: v.question,
+          option_a: v.option_a,
+          option_b: v.option_b,
+          option_c: v.option_c,
+          option_d: v.option_d,
+          option_e: v.option_e,
+          answer: v.answer,
+          selected: null,
+        };
+        newquestion = [...newquestion, { ...newobj }];
+      });
+      let queobj = {
+        questions: newquestion,
+        total: newquestion?.length + 1,
+        score: 0,
+        is_ans_given: false,
+      };
+
+      // register user as a partner
       let details = {
         title,
         fname,
@@ -27,6 +56,10 @@ const addpartner = async (req, res, next) => {
         age_retire,
         life_expectancy,
         user_id: req.user._id,
+        questionaries: {
+          ...queobj,
+          for: fname,
+        },
       };
       let partner = await Partner.create({
         ...details,

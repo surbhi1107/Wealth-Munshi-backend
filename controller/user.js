@@ -4,6 +4,7 @@ const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const Familymember = require("../models/familymember");
 const Partner = require("../models/partner");
+const Question = require("../models/question");
 
 const register = async (req, res, next) => {
   try {
@@ -19,6 +20,7 @@ const register = async (req, res, next) => {
       life_expectancy,
       phone_type,
       partner_details,
+      trust_name,
     } = req?.body;
     let success = false;
     if (phone_number && email) {
@@ -47,12 +49,40 @@ const register = async (req, res, next) => {
           password: secPass,
           role,
           phone_type,
+          trust_name,
         });
         if (!user?._id) {
           return res
             .status(400)
             .send({ success, error: "Something went wrong." });
         }
+        //add question to partner collection
+        let findquestions = await Question.find()
+          .select("-createdAt")
+          .select("-updatedAt");
+        let newquestion = [];
+        findquestions.map((v) => {
+          let newobj = {
+            _id: v._id,
+            type: v.type,
+            question: v.question,
+            option_a: v.option_a,
+            option_b: v.option_b,
+            option_c: v.option_c,
+            option_d: v.option_d,
+            option_e: v.option_e,
+            answer: v.answer,
+            selected: null,
+          };
+          newquestion = [...newquestion, { ...newobj }];
+        });
+        let queobj = {
+          questions: newquestion,
+          total: newquestion?.length + 1,
+          score: 0,
+          is_ans_given: false,
+        };
+
         // register user as a partner
         let newpartners = [
           {
@@ -64,6 +94,13 @@ const register = async (req, res, next) => {
             age_retire,
             life_expectancy,
             user_id: user?._id,
+            questionaries: {
+              ...queobj,
+              for:
+                client_type === 1
+                  ? `${fname}-${partner_details?.fname ?? ""}`
+                  : fname,
+            },
           },
         ];
         // if client type partner then add other partner

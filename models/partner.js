@@ -70,6 +70,11 @@ var partnerSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
     },
+    questionaries: {
+      type: Object,
+      require: false,
+      default: {},
+    },
   },
   { timestamps: true }
 );

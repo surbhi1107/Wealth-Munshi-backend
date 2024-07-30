@@ -50,6 +50,13 @@ const {
   getallassets,
 } = require("../controller/asset");
 const { getdashboarddata } = require("../controller/dashboard");
+const {
+  addQuestion,
+  getquestionbyid,
+  getallquestions,
+  updatequestion,
+  deleteQuestion,
+} = require("../controller/question");
 const router = express.Router();
 
 router.post("/user/register", register);
@@ -94,5 +101,11 @@ router.post("/asset/asset-by-id", authMiddleware, getassetbyid);
 router.get("/asset/get-all-assets", authMiddleware, getallassets);
 router.put("/asset/update", authMiddleware, updateasset);
 router.post("/asset/delete", authMiddleware, deleteasset);
+
+router.post("/question/create", authMiddleware, addQuestion);
+router.post("/question/question-by-id", authMiddleware, getquestionbyid);
+router.get("/question/get-all-questions", authMiddleware, getallquestions);
+router.put("/question/update", authMiddleware, updatequestion);
+router.post("/question/delete", authMiddleware, deleteQuestion);
 
 module.exports = router;
