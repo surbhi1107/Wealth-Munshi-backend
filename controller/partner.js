@@ -38,6 +38,7 @@ const addpartner = async (req, res, next) => {
         newquestion = [...newquestion, { ...newobj }];
       });
       let queobj = {
+        name: "MorningStar Questionnaire",
         questions: newquestion,
         total: newquestion?.length + 1,
         score: 0,
