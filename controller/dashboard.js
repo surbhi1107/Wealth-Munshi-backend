@@ -6,7 +6,10 @@ const getdashboarddata = async (req, res, next) => {
   try {
     let data = await Partner.find({ user_id: req.user._id });
     let memberData = await Familymember.find({
-      $and: [{ user_id: req.user?._id }, { type: { $ne: "self" } }],
+      $and: [
+        { user_id: req.user?._id },
+        { type: { $nin: ["self", "partner"] } },
+      ],
     });
     let contactData = await Contact.find({ user_id: req.user._id });
     return res.send({

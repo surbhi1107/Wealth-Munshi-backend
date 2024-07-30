@@ -16,6 +16,11 @@ var UserSchema = new Schema(
       trim: true,
       required: false,
     },
+    country_code: {
+      type: String,
+      trim: true,
+      required: false,
+    },
     phone_number: {
       type: String,
       trim: true,
@@ -47,12 +52,13 @@ var UserSchema = new Schema(
     },
     age_retire: {
       type: Number,
-      trim: true,
       require: false,
+      default: 65,
     },
     life_expectancy: {
       type: Number,
       require: false,
+      default: 85,
     },
     trust_name: {
       type: String,

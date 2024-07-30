@@ -47,10 +47,12 @@ var familymemberSchema = new Schema(
     age_retire: {
       type: Number,
       require: false,
+      default: 65,
     },
     life_expectancy: {
       type: Number,
       require: false,
+      default: 85,
     },
     is_associate: {
       type: Boolean,

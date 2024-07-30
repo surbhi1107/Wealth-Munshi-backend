@@ -1,3 +1,4 @@
+const Familymember = require("../models/familymember");
 const Partner = require("../models/partner");
 
 const addpartner = async (req, res, next) => {
@@ -15,7 +16,7 @@ const addpartner = async (req, res, next) => {
     } = req?.body;
     let success = false;
     if (fname && lname) {
-      let partner = await Partner.create({
+      let details = {
         title,
         fname,
         mname,
@@ -26,12 +27,19 @@ const addpartner = async (req, res, next) => {
         age_retire,
         life_expectancy,
         user_id: req.user._id,
+      };
+      let partner = await Partner.create({
+        ...details,
       });
       if (!partner?._id) {
         return res
           .status(400)
           .send({ success, error: "Something went wrong." });
       }
+      await Familymember.create({
+        ...details,
+        type: "partner",
+      });
       success = true;
       return res.send({ success, data: partner });
     } else {
@@ -128,10 +136,29 @@ const getallpartners = async (req, res, next) => {
   }
 };
 
+const getuserpartner = async (req, res, next) => {
+  try {
+    let userId = req.user?._id;
+    let success = false;
+    let partner = await Partner.findOne({
+      $and: [{ user_id: userId }, { is_register_partner: true }],
+    });
+    if (!partner) {
+      return res.status(400).send({ success, error: "Data not found" });
+    }
+    success = true;
+    return res.send({ success, partner: partner });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   addpartner,
   updatepartner,
   getpartnerbyid,
   deletepartner,
   getallpartners,
+  getuserpartner,
 };

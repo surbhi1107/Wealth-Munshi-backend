@@ -19,6 +19,7 @@ const {
   getallpartners,
   updatepartner,
   deletepartner,
+  getuserpartner,
 } = require("../controller/partner");
 const {
   addcontact,
@@ -65,6 +66,7 @@ router.get("/user/get-dashboard", authMiddleware, getdashboarddata);
 
 router.post("/partner/create", authMiddleware, addpartner);
 router.post("/partner/partner-by-id", authMiddleware, getpartnerbyid);
+router.get("/partner/get-user-partner", authMiddleware, getuserpartner);
 router.get("/partner/get-all-partners", authMiddleware, getallpartners);
 router.put("/partner/update", authMiddleware, updatepartner);
 router.post("/partner/delete", authMiddleware, deletepartner);

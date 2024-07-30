@@ -6,6 +6,11 @@ let Schema = mongoose.Schema;
  */
 var partnerSchema = new Schema(
   {
+    type: {
+      type: String,
+      trim: true,
+      default: "partner",
+    },
     title: {
       type: String,
       trim: true,
@@ -41,13 +46,22 @@ var partnerSchema = new Schema(
     },
     age_retire: {
       type: Number,
-      require: false,
+      require: true,
+      default: 65,
     },
     life_expectancy: {
       type: Number,
-      require: false,
+      require: true,
+      default: 85,
     },
+    // partner or couple
     is_register_partner: {
+      type: Boolean,
+      require: false,
+      default: false,
+    },
+    // main partner which is user
+    is_main_partner: {
       type: Boolean,
       require: false,
       default: false,

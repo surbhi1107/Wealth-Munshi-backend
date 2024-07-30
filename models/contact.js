@@ -47,10 +47,12 @@ var contactSchema = new Schema(
     age_retire: {
       type: Number,
       require: false,
+      default: 65,
     },
     life_expectancy: {
       type: Number,
       require: false,
+      default: 85,
     },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,

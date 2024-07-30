@@ -526,17 +526,41 @@ const updateuser = async (req, res, next) => {
     let userId = req.user?._id;
     let success = false;
     const { userDetails } = req.body;
-
     if (!userId) {
       return res.status(500).send({ success, error: "Something Wrong" });
     }
     const user = await User.findById(req.user._id);
     if (user) {
-      let updateDetails = await User.findByIdAndUpdate(req.user.id, {
+      await User.findByIdAndUpdate(req.user.id, {
         $set: userDetails,
-      });
+      }).select("-password");
+      let dummyuserdetails = {
+        ...userDetails,
+      };
+      delete dummyuserdetails["email"];
+      delete dummyuserdetails["currency"];
+      delete dummyuserdetails["phone_type"];
+      delete dummyuserdetails["country_code"];
+      delete dummyuserdetails["role"];
+      delete dummyuserdetails["_id"];
+      delete dummyuserdetails["phone_number"];
+      delete dummyuserdetails["client_type"];
+      delete dummyuserdetails["password"];
+      await Familymember.findOneAndUpdate(
+        { $and: [{ user_id: req.user?._id }, { type: "self" }] },
+        {
+          $set: dummyuserdetails,
+        }
+      );
+      await Partner.findOneAndUpdate(
+        { $and: [{ user_id: req.user?._id }, { type: "main_client" }] },
+        {
+          $set: dummyuserdetails,
+        }
+      );
+      let updatedUser = await User.findById(req.user._id);
       success = true;
-      res.status(200).send({ success });
+      res.status(200).send({ success, user: updatedUser });
     } else {
       return res.status(400).send("User Not Found");
     }
