@@ -22,9 +22,7 @@ const register = async (req, res, next) => {
     } = req?.body;
     let success = false;
     if (phone_number && email) {
-      let user = await User.findOne({
-        $or: [{ email: email }, { phone_number: phone_number }],
-      });
+      let user = await User.findOne({ email: email });
       if (user) {
         return res
           .status(400)
@@ -55,25 +53,60 @@ const register = async (req, res, next) => {
             .status(400)
             .send({ success, error: "Something went wrong." });
         }
+        // register user as a partner
+        let newpartners = [
+          {
+            type: "main_client",
+            fname,
+            lname,
+            known_as: `${fname} ${lname}`,
+            dob,
+            age_retire,
+            life_expectancy,
+            user_id: user?._id,
+          },
+        ];
+        // if client type partner then add other partner
         if (partner_details) {
-          let partner = await Partner.create({
-            ...partner_details,
-            user_id: user._id,
-          });
-          console.log("...", partner);
+          newpartners = [
+            ...newpartners,
+            {
+              ...partner_details,
+              type: "partner",
+              is_register_partner: true,
+              user_id: user._id,
+            },
+          ];
         }
+        let partner = await Partner.insertMany([...newpartners]);
+        console.log("...", partner);
         // save user as member in familymember collection
-        let member = await Familymember.create({
-          type: "self",
-          fname,
-          lname,
-          known_as: `${fname} ${lname}`,
-          dob,
-          age_retire,
-          life_expectancy,
-          user_id: user?._id,
-        });
+        let newmembers = [
+          {
+            type: "self",
+            is_associate: client_type === 2 ? true : false,
+            fname,
+            lname,
+            known_as: `${fname} ${lname}`,
+            dob,
+            age_retire,
+            life_expectancy,
+            user_id: user?._id,
+          },
+        ];
+        if (partner_details) {
+          newmembers = [
+            ...newmembers,
+            {
+              ...partner_details,
+              type: "partner",
+              user_id: user._id,
+            },
+          ];
+        }
+        let member = await Familymember.insertMany([...newmembers]);
         console.log(member);
+
         //sending welcome mail to user
         let link = "http://139.59.63.31/";
         var transporter = nodemailer.createTransport({

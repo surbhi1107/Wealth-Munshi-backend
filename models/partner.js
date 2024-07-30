@@ -47,6 +47,11 @@ var partnerSchema = new Schema(
       type: Number,
       require: false,
     },
+    is_register_partner: {
+      type: Boolean,
+      require: false,
+      default: false,
+    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",

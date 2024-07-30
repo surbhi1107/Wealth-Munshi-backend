@@ -52,6 +52,11 @@ var familymemberSchema = new Schema(
       type: Number,
       require: false,
     },
+    is_associate: {
+      type: Boolean,
+      require: false,
+      default: false,
+    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
