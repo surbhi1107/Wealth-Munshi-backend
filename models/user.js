@@ -73,20 +73,6 @@ var UserSchema = new Schema(
       type: Number,
       require: false,
     },
-    risk_questionaries: {
-      obtained_score: {
-        type: Number,
-        require: false,
-      },
-      total_score: {
-        type: Number,
-        require: false,
-      },
-      result: {
-        type: String,
-        require: false,
-      },
-    },
   },
   { timestamps: true }
 );
