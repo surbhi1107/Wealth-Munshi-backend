@@ -57,6 +57,11 @@ const {
   updatequestion,
   deleteQuestion,
 } = require("../controller/question");
+const {
+  getQuestionaries,
+  getPartnerQuestionaries,
+  updateQuestionaries,
+} = require("../controller/risk-profile");
 const router = express.Router();
 
 router.post("/user/register", register);
@@ -90,6 +95,18 @@ router.post("/member/get-all-members", authMiddleware, getallmembers);
 router.put("/member/update", authMiddleware, updatemember);
 router.post("/member/delete", authMiddleware, deletemember);
 
+router.get("/risk-profile/get-questionaries", authMiddleware, getQuestionaries);
+router.post(
+  "/risk-profile/get-partner-questionaries",
+  authMiddleware,
+  getPartnerQuestionaries
+);
+router.put(
+  "/risk-profile/update-questionaries",
+  authMiddleware,
+  updateQuestionaries
+);
+
 router.post("/goal/create", authMiddleware, addgoal);
 router.post("/goal/goal-by-id", authMiddleware, getgoalbyid);
 router.get("/goal/get-all-goals", authMiddleware, getallgoals);
@@ -102,10 +119,10 @@ router.get("/asset/get-all-assets", authMiddleware, getallassets);
 router.put("/asset/update", authMiddleware, updateasset);
 router.post("/asset/delete", authMiddleware, deleteasset);
 
-router.post("/question/create", authMiddleware, addQuestion);
-router.post("/question/question-by-id", authMiddleware, getquestionbyid);
-router.get("/question/get-all-questions", authMiddleware, getallquestions);
-router.put("/question/update", authMiddleware, updatequestion);
-router.post("/question/delete", authMiddleware, deleteQuestion);
+router.post("/question/create", adminMiddleware, addQuestion);
+router.post("/question/question-by-id", adminMiddleware, getquestionbyid);
+router.get("/question/get-all-questions", adminMiddleware, getallquestions);
+router.put("/question/update", adminMiddleware, updatequestion);
+router.post("/question/delete", adminMiddleware, deleteQuestion);
 
 module.exports = router;

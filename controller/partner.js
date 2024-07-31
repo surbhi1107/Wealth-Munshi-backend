@@ -40,8 +40,8 @@ const addpartner = async (req, res, next) => {
       let queobj = {
         name: "MorningStar Questionnaire",
         questions: newquestion,
-        total: newquestion?.length + 1,
-        score: 0,
+        total: newquestion?.length,
+        score: null,
         is_ans_given: false,
       };
 
