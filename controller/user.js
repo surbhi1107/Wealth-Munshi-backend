@@ -212,10 +212,12 @@ const register = async (req, res, next) => {
         transporter.sendMail(mailOptions, function (error, info) {
           if (error) {
             console.log(error);
-            return res.status(400).send("mail not send.");
+            success = false;
+            return res.status(400).send({ success, error: "mail not send." });
           } else if (info.rejected?.length > 0) {
             console.log("Email sent: ", info.rejected);
-            return res.status(400).send("mail not send.");
+            success = false;
+            return res.status(400).send({ success, error: "mail not send." });
           } else {
             // create authentication token
             // const authToken = jwt.sign(
@@ -232,11 +234,16 @@ const register = async (req, res, next) => {
         });
       }
     } else {
-      return res.status(500).send("All fields are required");
+      success = false;
+      return res
+        .status(500)
+        .send({ success, error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
-    return res.status(500).send({ error: "Internal server error" });
+    return res
+      .status(500)
+      .send({ success: false, error: "Internal server error" });
   }
 };
 
