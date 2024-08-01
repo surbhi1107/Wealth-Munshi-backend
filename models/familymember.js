@@ -41,7 +41,8 @@ var familymemberSchema = new Schema(
       require: false,
     },
     dob: {
-      type: Date,
+      type: String,
+      trim: true,
       require: false,
     },
     age_retire: {

@@ -8,24 +8,20 @@ const addsaving = async (req, res, next) => {
       amount,
       inflation,
       isin_cashflow,
-      start_time,
-      end_time,
-      timeline_desc,
-      user_recommended,
+      start_timeline,
+      end_timeline,
       asset_id,
     } = req?.body;
     let success = false;
-    if (type && start_time && end_time) {
+    if (type && start_timeline?.date && end_timeline?.date) {
       let saving = await Saving.create({
         type,
         name,
         amount,
         inflation,
         isin_cashflow,
-        start_time,
-        end_time,
-        timeline_desc,
-        user_recommended,
+        start_timeline,
+        end_timeline,
         asset_id,
         user_id: req.user._id,
       });

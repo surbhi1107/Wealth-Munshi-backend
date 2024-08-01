@@ -1,6 +1,28 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
 
+const StartTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
+const EndTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
 /**
  * Saving Schema
  */
@@ -24,24 +46,9 @@ var savingSchema = new Schema(
       type: Number,
       require: false,
     },
-    start_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
-    end_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
     isin_cashflow: {
       type: Boolean,
       default: false,
-      required: false,
-    },
-    timeline_desc: {
-      type: String,
-      trim: true,
       required: false,
     },
     user_id: {
@@ -52,10 +59,8 @@ var savingSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "asset",
     },
-    user_recommended: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "familymember",
-    },
+    start_timeline: StartTimelineSchema,
+    end_timeline: EndTimelineSchema,
   },
   { timestamps: true }
 );

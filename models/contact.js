@@ -41,7 +41,7 @@ var contactSchema = new Schema(
       require: false,
     },
     dob: {
-      type: Date,
+      type: String,
       require: false,
     },
     age_retire: {

@@ -38,7 +38,8 @@ var UserSchema = new Schema(
       required: false,
     },
     dob: {
-      type: Date,
+      type: String,
+      trim: true,
       require: false,
     },
     currency: {

@@ -14,7 +14,7 @@ const addliability = async (req, res, next) => {
       payment_details,
     } = req?.body;
     let success = false;
-    if (type && start_time && end_time) {
+    if (type && curr_amount) {
       let liability = await Liability.create({
         type,
         name,
@@ -36,13 +36,11 @@ const addliability = async (req, res, next) => {
           name: payment_details?.name,
           amount: payment_details?.amount,
           inflation: payment_details?.inflation,
-          start_time: payment_details?.start_time,
-          end_time: payment_details?.end_time,
+          next_payment_start: payment_details?.next_payment_start,
+          next_payment_end: payment_details?.next_payment_end,
           payment_time: payment_details?.payment_time,
           isin_cashflow: payment_details?.isin_cashflow,
-          timeline_desc: payment_details?.timeline_desc,
           liability_id: liability?._id,
-          user_recommended: payment_details?.user_recommended,
           user_id: req.user._id,
         };
         let donePayment = await Payment.create({
@@ -139,13 +137,11 @@ const updateliability = async (req, res, next) => {
             name: payment_details?.name,
             amount: payment_details?.amount,
             inflation: payment_details?.inflation,
-            start_time: payment_details?.start_time,
-            end_time: payment_details?.end_time,
+            next_payment_start: payment_details?.next_payment_start,
+            next_payment_end: payment_details?.next_payment_end,
             payment_time: payment_details?.payment_time,
             isin_cashflow: payment_details?.isin_cashflow,
-            timeline_desc: payment_details?.timeline_desc,
             liability_id: updatedLiability?._id,
-            user_recommended: payment_details?.user_recommended,
             user_id: req.user._id,
           };
           let donePayment = await Payment.create({

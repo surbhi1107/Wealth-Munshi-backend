@@ -10,10 +10,8 @@ const addasset = async (req, res, next) => {
       owner,
       goals,
       surplus_goals,
-      start_time,
+      start_timeline,
       isAssest,
-      timeline_desc,
-      user_recommended,
     } = req?.body;
     let success = false;
     if (type && curr_valuation && owner && req.user?._id) {
@@ -24,11 +22,9 @@ const addasset = async (req, res, next) => {
         owner,
         goals,
         surplus_goals,
-        start_time,
         isAssest,
-        timeline_desc,
+        start_timeline,
         user_id: req.user?._id,
-        ...(user_recommended?.length > 0 ? { user_recommended } : {}),
       });
       if (!asset?._id) {
         return res

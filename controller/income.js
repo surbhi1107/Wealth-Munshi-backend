@@ -9,14 +9,12 @@ const addincome = async (req, res, next) => {
       amount,
       income_duration,
       growth_rate,
-      start_time,
-      end_time,
+      start_timeline,
+      end_timeline,
       use_for_living_expenses,
-      timeline_desc,
-      user_recommended,
     } = req?.body;
     let success = false;
-    if (type && start_time && end_time) {
+    if (type && start_timeline && end_timeline) {
       let income = await Income.create({
         type,
         name,
@@ -24,11 +22,9 @@ const addincome = async (req, res, next) => {
         amount,
         income_duration,
         growth_rate,
-        start_time,
-        end_time,
+        start_timeline,
+        end_timeline,
         use_for_living_expenses,
-        timeline_desc,
-        user_recommended,
         user_id: req.user._id,
       });
       if (!income?._id) {

@@ -1,6 +1,28 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
 
+const StartTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
+const EndTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
 /**
  * Payment Schema
  */
@@ -24,16 +46,6 @@ var paymentSchema = new Schema(
       type: Number,
       require: false,
     },
-    start_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
-    end_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
     payment_time: {
       type: Date,
       trim: true,
@@ -44,11 +56,8 @@ var paymentSchema = new Schema(
       default: false,
       required: false,
     },
-    timeline_desc: {
-      type: String,
-      trim: true,
-      required: false,
-    },
+    next_payment_start: StartTimelineSchema,
+    next_payment_end: EndTimelineSchema,
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
@@ -56,10 +65,6 @@ var paymentSchema = new Schema(
     liability_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "liability",
-    },
-    user_recommended: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "familymember",
     },
   },
   { timestamps: true }

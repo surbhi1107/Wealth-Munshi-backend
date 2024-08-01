@@ -9,27 +9,23 @@ const addgoal = async (req, res, next) => {
       amount,
       inflation,
       is_longterm_goal,
-      start_time,
-      end_time,
       priority,
-      timeline_desc,
       goal_often,
-      user_recommended,
+      start_timeline,
+      end_timeline,
     } = req?.body;
     let success = false;
-    if (type && start_time && amount) {
+    if (type && start_timeline && amount) {
       let goal = await Goal.create({
         type,
         name,
         amount,
         inflation,
         is_longterm_goal,
-        start_time,
-        end_time,
         priority,
         user_id: req.user._id,
-        user_recommended,
-        timeline_desc,
+        start_timeline,
+        end_timeline,
         goal_often,
       });
       if (!goal?._id) {

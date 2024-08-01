@@ -4,6 +4,29 @@ let Schema = mongoose.Schema;
 /**
  * Goal Schema
  */
+
+const StartTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
+const EndTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
 var goalSchema = new Schema(
   {
     type: {
@@ -29,16 +52,8 @@ var goalSchema = new Schema(
       type: Boolean,
       require: false,
     },
-    start_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
-    end_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
+    start_timeline: StartTimelineSchema,
+    end_timeline: EndTimelineSchema,
     priority: {
       type: Number,
       require: false,
@@ -46,14 +61,6 @@ var goalSchema = new Schema(
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-    },
-    user_recommended: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "familymember",
-    },
-    timeline_desc: {
-      type: String,
-      require: false,
     },
     goal_often: {
       type: String,

@@ -8,28 +8,24 @@ const addpayment = async (req, res, next) => {
       name,
       amount,
       inflation,
-      start_time,
-      end_time,
+      next_payment_start,
+      next_payment_end,
       payment_time,
       isin_cashflow,
-      timeline_desc,
       liability_id,
-      user_recommended,
     } = req?.body;
     let success = false;
-    if (type && start_time && end_time) {
+    if (type && next_payment_start?.date && next_payment_end?.date) {
       let payment = await Payment.create({
         type,
         name,
         amount,
         inflation,
-        start_time,
-        end_time,
+        next_payment_start,
+        next_payment_end,
         payment_time,
         isin_cashflow,
-        timeline_desc,
         liability_id,
-        user_recommended,
         user_id: req.user._id,
       });
       if (!payment?._id) {

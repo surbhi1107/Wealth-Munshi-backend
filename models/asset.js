@@ -4,6 +4,29 @@ let Schema = mongoose.Schema;
 /**
  * Asset Schema
  */
+
+const StartTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
+const EndTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
 var assetSchema = new Schema(
   {
     type: {
@@ -34,28 +57,16 @@ var assetSchema = new Schema(
       ref: "goal",
       default: [],
     },
-    start_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
     isAssest: {
       type: Boolean,
       default: true,
       required: false,
     },
-    timeline_desc: {
-      type: String,
-      trim: true,
-      required: false,
-    },
+    start_timeline: StartTimelineSchema,
+    end_timeline: EndTimelineSchema,
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-    },
-    user_recommended: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "familymember",
     },
   },
   { timestamps: true }

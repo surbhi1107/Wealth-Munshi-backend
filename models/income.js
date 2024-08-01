@@ -1,6 +1,28 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
 
+const StartTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
+const EndTimelineSchema = new Schema({
+  date: Date,
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "familymember",
+  },
+  value: String,
+  type: String,
+  desc: String,
+});
+
 /**
  * Income Schema
  */
@@ -33,33 +55,16 @@ var incomeSchema = new Schema(
       type: Number,
       require: false,
     },
-    start_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
-    end_time: {
-      type: Date,
-      trim: true,
-      require: false,
-    },
     use_for_living_expenses: {
       type: Boolean,
       default: true,
       required: false,
     },
-    timeline_desc: {
-      type: String,
-      trim: true,
-      required: false,
-    },
+    start_timeline: StartTimelineSchema,
+    end_timeline: EndTimelineSchema,
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-    },
-    user_recommended: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "familymember",
     },
   },
   { timestamps: true }
