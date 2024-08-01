@@ -4,7 +4,9 @@ const getQuestionaries = async (req, res, next) => {
   try {
     let userId = req.user?._id;
     let success = false;
-    let partner = await Partner.find({ user_id: userId });
+    let partner = await Partner.find({
+      $and: [{ user_id: userId }, { is_register_partner: false }],
+    });
     if (!partner) {
       return res.status(400).send({ success, error: "Data not found" });
     }

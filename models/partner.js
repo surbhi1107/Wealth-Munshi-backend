@@ -60,12 +60,6 @@ var partnerSchema = new Schema(
       require: false,
       default: false,
     },
-    // main partner which is user
-    is_main_partner: {
-      type: Boolean,
-      require: false,
-      default: false,
-    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
