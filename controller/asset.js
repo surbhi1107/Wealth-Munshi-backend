@@ -202,10 +202,69 @@ const getallassets = async (req, res, next) => {
   }
 };
 
+const getgoalresources = async (req, res, next) => {
+  try {
+    let data = await Asset.aggregate([
+      { $match: { user_id: req.user._id } },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "user_recommended",
+          foreignField: "_id",
+          as: "user_recommended",
+        },
+      },
+      {
+        $addFields: {
+          user_recommended: {
+            $first: "$user_recommended",
+          },
+          owner: {
+            $first: "$owner",
+          },
+        },
+      },
+      // // Unwind the source
+      // { $unwind: "$goals" },
+      // // Do the lookup matching
+      // {
+      //   $lookup: {
+      //     from: "goals",
+      //     localField: "goal",
+      //     foreignField: "_id",
+      //     as: "goals",
+      //   },
+      // },
+      // // Unwind the result arrays ( likely one or none )
+      // // { $unwind: "$goals" },
+      // // Group back to arrays
+      // {
+      //   $group: {
+      //     _id: "$_id",
+      //     goals: { $push: "$goals" },
+      //   },
+      // },
+    ]);
+    return res.send({ data });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   addasset,
   getassetbyid,
   updateasset,
   deleteasset,
   getallassets,
+  getgoalresources,
 };

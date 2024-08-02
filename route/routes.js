@@ -48,6 +48,7 @@ const {
   updateasset,
   deleteasset,
   getallassets,
+  getgoalresources,
 } = require("../controller/asset");
 const { getdashboarddata } = require("../controller/dashboard");
 const {
@@ -116,6 +117,7 @@ router.post("/goal/delete", authMiddleware, deletegoal);
 router.post("/asset/create", authMiddleware, addasset);
 router.post("/asset/asset-by-id", authMiddleware, getassetbyid);
 router.get("/asset/get-all-assets", authMiddleware, getallassets);
+router.get("/asset/get-goal-resources", authMiddleware, getgoalresources);
 router.put("/asset/update", authMiddleware, updateasset);
 router.post("/asset/delete", authMiddleware, deleteasset);
 

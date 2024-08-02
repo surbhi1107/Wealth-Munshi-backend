@@ -59,15 +59,26 @@ const getgoalbyid = async (req, res, next) => {
       {
         $lookup: {
           from: "familymembers",
-          localField: "user_recommended",
+          localField: "start_timeline.member",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "end_timeline.member",
+          foreignField: "_id",
+          as: "end_member",
         },
       },
       {
         $addFields: {
-          user_recommended: {
-            $first: "$user_recommended",
+          start_member: {
+            $first: "$start_member",
+          },
+          end_member: {
+            $first: "$end_member",
           },
         },
       },
@@ -142,15 +153,26 @@ const getallgoals = async (req, res, next) => {
       {
         $lookup: {
           from: "familymembers",
-          localField: "user_recommended",
+          localField: "start_timeline.member",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "end_timeline.member",
+          foreignField: "_id",
+          as: "end_member",
         },
       },
       {
         $addFields: {
-          user_recommended: {
-            $first: "$user_recommended",
+          start_member: {
+            $first: "$start_member",
+          },
+          end_member: {
+            $first: "$end_member",
           },
         },
       },
