@@ -123,7 +123,7 @@ const deletemember = async (req, res, next) => {
 const getallmembers = async (req, res, next) => {
   try {
     let data = await Familymember.find({ user_id: req.user?._id });
-    return res.send({ data });
+    return res.send({ success: true, data });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ error: "Internal server error" });
