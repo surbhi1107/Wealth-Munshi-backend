@@ -44,8 +44,7 @@ var goalSchema = new Schema(
       required: false,
     },
     inflation: {
-      type: String,
-      trim: true,
+      type: Number,
       require: false,
     },
     is_longterm_goal: {
