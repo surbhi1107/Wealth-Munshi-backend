@@ -138,6 +138,7 @@ const register = async (req, res, next) => {
             {
               ...partner_details,
               type: "partner",
+              partner_id: partner?.[1]?._id,
               user_id: user._id,
             },
           ];

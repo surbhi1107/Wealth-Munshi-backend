@@ -60,6 +60,10 @@ var familymemberSchema = new Schema(
       require: false,
       default: false,
     },
+    partner_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "partner",
+    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",

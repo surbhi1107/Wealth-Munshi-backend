@@ -8,10 +8,12 @@ const addasset = async (req, res, next) => {
       name,
       curr_valuation,
       owner,
-      goals,
-      surplus_goals,
-      start_timeline,
       isAssest,
+      goals,
+      surplus_goals = [],
+      resources_access_time,
+      goal_state,
+      surplusgoal_state,
     } = req?.body;
     let success = false;
     if (type && curr_valuation && owner && req.user?._id) {
@@ -23,8 +25,10 @@ const addasset = async (req, res, next) => {
         goals,
         surplus_goals,
         isAssest,
-        start_timeline,
+        resources_access_time,
         user_id: req.user?._id,
+        goal_state,
+        surplusgoal_state,
       });
       if (!asset?._id) {
         return res
@@ -65,18 +69,34 @@ const getassetbyid = async (req, res, next) => {
       {
         $lookup: {
           from: "familymembers",
-          localField: "user_recommended",
+          localField: "resources_access_time.member",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "goals",
+          localField: "goals",
+          foreignField: "_id",
+          as: "goals",
+        },
+      },
+      {
+        $lookup: {
+          from: "goals",
+          localField: "surplus_goals",
+          foreignField: "_id",
+          as: "surplus_goals",
         },
       },
       {
         $addFields: {
-          user_recommended: {
-            $first: "$user_recommended",
-          },
           owner: {
             $first: "$owner",
+          },
+          start_member: {
+            $first: "$start_member",
           },
         },
       },
@@ -146,8 +166,19 @@ const deleteasset = async (req, res, next) => {
 
 const getallassets = async (req, res, next) => {
   try {
+    let condition = [];
+    let isAssest = req?.body?.isAssest;
+    if (isAssest !== undefined) {
+      condition = [
+        {
+          $match: { $and: [{ user_id: req.user._id }, { isAssest: isAssest }] },
+        },
+      ];
+    } else {
+      condition = [{ $match: { user_id: req.user._id } }];
+    }
     let data = await Asset.aggregate([
-      { $match: { user_id: req.user._id } },
+      ...condition,
       {
         $lookup: {
           from: "familymembers",
@@ -159,43 +190,39 @@ const getallassets = async (req, res, next) => {
       {
         $lookup: {
           from: "familymembers",
-          localField: "user_recommended",
+          localField: "resources_access_time.member",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "goals",
+          localField: "goals",
+          foreignField: "_id",
+          as: "goals",
+        },
+      },
+      {
+        $lookup: {
+          from: "goals",
+          localField: "surplus_goals",
+          foreignField: "_id",
+          as: "surplus_goals",
         },
       },
       {
         $addFields: {
-          user_recommended: {
-            $first: "$user_recommended",
-          },
           owner: {
             $first: "$owner",
           },
+          start_member: {
+            $first: "$start_member",
+          },
         },
       },
-      // // Unwind the source
-      // { $unwind: "$goals" },
-      // // Do the lookup matching
-      // {
-      //   $lookup: {
-      //     from: "goals",
-      //     localField: "goal",
-      //     foreignField: "_id",
-      //     as: "goals",
-      //   },
-      // },
-      // // Unwind the result arrays ( likely one or none )
-      // // { $unwind: "$goals" },
-      // // Group back to arrays
-      // {
-      //   $group: {
-      //     _id: "$_id",
-      //     goals: { $push: "$goals" },
-      //   },
-      // },
     ]);
-    return res.send({ data });
+    return res.send({ success: true, data });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ error: "Internal server error" });
@@ -217,41 +244,37 @@ const getgoalresources = async (req, res, next) => {
       {
         $lookup: {
           from: "familymembers",
-          localField: "user_recommended",
+          localField: "resources_access_time.member",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "goals",
+          localField: "goals",
+          foreignField: "_id",
+          as: "goals",
+        },
+      },
+      {
+        $lookup: {
+          from: "goals",
+          localField: "surplus_goals",
+          foreignField: "_id",
+          as: "surplus_goals",
         },
       },
       {
         $addFields: {
-          user_recommended: {
-            $first: "$user_recommended",
-          },
           owner: {
             $first: "$owner",
           },
+          start_member: {
+            $first: "$start_member",
+          },
         },
       },
-      // // Unwind the source
-      // { $unwind: "$goals" },
-      // // Do the lookup matching
-      // {
-      //   $lookup: {
-      //     from: "goals",
-      //     localField: "goal",
-      //     foreignField: "_id",
-      //     as: "goals",
-      //   },
-      // },
-      // // Unwind the result arrays ( likely one or none )
-      // // { $unwind: "$goals" },
-      // // Group back to arrays
-      // {
-      //   $group: {
-      //     _id: "$_id",
-      //     goals: { $push: "$goals" },
-      //   },
-      // },
     ]);
     return res.send({ data });
   } catch (error) {

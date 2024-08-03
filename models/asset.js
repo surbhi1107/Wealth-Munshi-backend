@@ -62,8 +62,17 @@ var assetSchema = new Schema(
       default: true,
       required: false,
     },
-    start_timeline: StartTimelineSchema,
-    end_timeline: EndTimelineSchema,
+    goal_state: {
+      type: String,
+      trim: true,
+      required: false,
+    },
+    surplusgoal_state: {
+      type: String,
+      trim: true,
+      required: false,
+    },
+    resources_access_time: StartTimelineSchema,
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",

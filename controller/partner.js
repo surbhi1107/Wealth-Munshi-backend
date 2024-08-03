@@ -72,6 +72,7 @@ const addpartner = async (req, res, next) => {
       }
       await Familymember.create({
         ...details,
+        partner_id: partner?._id,
         type: "partner",
       });
       success = true;
@@ -144,10 +145,16 @@ const deletepartner = async (req, res, next) => {
     const findPartner = await Partner.findOne({
       $and: [{ _id: partnerId }, { user_id: req.user?._id }],
     });
+    let findpartnerinmember = await Familymember.findOne({
+      $and: [{ partner_id: partnerId }, { user_id: req.user?._id }],
+    });
     if (!findPartner) {
       return res.status(400).send({ success, msg: "Data Not Found" });
     }
     let deleted = await Partner.findByIdAndDelete(partnerId);
+    let deletedmember = await Familymember.findByIdAndDelete(
+      findpartnerinmember?._id
+    );
     if (!deleted?._id) {
       success = false;
       return res.status(500).send({ success, msg: "delete unsuccessfully" });
