@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Income = require("../models/income");
 
 const addincome = async (req, res, next) => {
@@ -7,24 +8,28 @@ const addincome = async (req, res, next) => {
       name,
       income_owner,
       amount,
-      income_duration,
+      timeline,
       growth_rate,
-      start_timeline,
-      end_timeline,
+      income_start,
+      income_end,
       use_for_living_expenses,
+      goal_state,
+      goals,
     } = req?.body;
     let success = false;
-    if (type && start_timeline && end_timeline) {
+    if (type && income_start && income_end) {
       let income = await Income.create({
         type,
         name,
         income_owner,
         amount,
-        income_duration,
+        timeline,
         growth_rate,
-        start_timeline,
-        end_timeline,
+        income_start,
+        income_end,
         use_for_living_expenses,
+        goal_state,
+        goals,
         user_id: req.user._id,
       });
       if (!income?._id) {
@@ -35,7 +40,9 @@ const addincome = async (req, res, next) => {
       success = true;
       return res.send({ success, data: income });
     } else {
-      return res.status(500).send("All fields are required");
+      return res
+        .status(500)
+        .send({ success: false, error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
@@ -53,10 +60,10 @@ const getincomebyid = async (req, res, next) => {
         .send({ success, error: "All fields are required" });
     }
     let income = await Income.aggregate([
-      { $and: [{ _id: incomeId }, { user_id: req.user?._id }] },
+      { $match: { _id: new mongoose.Types.ObjectId(incomeId) } },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "income_owner",
           foreignField: "_id",
           as: "income_owner",
@@ -64,10 +71,39 @@ const getincomebyid = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "familymember",
-          localField: "user_recommended",
+          from: "goals",
+          localField: "goals",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "goals",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "income_start.member",
+          foreignField: "_id",
+          as: "income_start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "income_end.member",
+          foreignField: "_id",
+          as: "income_end_member",
+        },
+      },
+      {
+        $addFields: {
+          income_owner: {
+            $first: "$income_owner",
+          },
+          income_start_member: {
+            $first: "$income_start_member",
+          },
+          income_end_member: {
+            $first: "$income_end_member",
+          },
         },
       },
     ]);
@@ -101,7 +137,7 @@ const updateincome = async (req, res, next) => {
         $set: details,
       });
       success = true;
-      res.status(200).send({ success });
+      res.status(200).send({ success, msg: "data Updated successfully" });
     } else {
       return res.status(400).send("Data Not Found");
     }
@@ -115,11 +151,9 @@ const deleteincome = async (req, res, next) => {
   try {
     const incomeId = req.body?.incomeId;
     let success = false;
-    const findIncome = await Income.findOne({
-      $and: [{ _id: incomeId }, { user_id: req.user?._id }],
-    });
+    const findIncome = await Income.findById(incomeId);
     if (!findIncome) {
-      return res.status(400).send({ success, msg: "Data Not Found" });
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
     let deleted = await Income.findByIdAndDelete(incomeId);
     if (!deleted?._id) {
@@ -140,7 +174,7 @@ const getallincomes = async (req, res, next) => {
       { $match: { user_id: req.user._id } },
       {
         $lookup: {
-          from: "familymember",
+          from: "familymembers",
           localField: "income_owner",
           foreignField: "_id",
           as: "income_owner",
@@ -148,10 +182,39 @@ const getallincomes = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "familymember",
-          localField: "user_recommended",
+          from: "goals",
+          localField: "goals",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "goals",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "income_start.member",
+          foreignField: "_id",
+          as: "income_start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "income_end.member",
+          foreignField: "_id",
+          as: "income_end_member",
+        },
+      },
+      {
+        $addFields: {
+          income_owner: {
+            $first: "$income_owner",
+          },
+          income_start_member: {
+            $first: "$income_start_member",
+          },
+          income_end_member: {
+            $first: "$income_end_member",
+          },
         },
       },
     ]);

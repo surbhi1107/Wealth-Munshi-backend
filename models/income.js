@@ -46,7 +46,7 @@ var incomeSchema = new Schema(
       type: Number,
       require: false,
     },
-    income_duration: {
+    timeline: {
       type: String,
       trim: true,
       require: false,
@@ -60,8 +60,18 @@ var incomeSchema = new Schema(
       default: true,
       required: false,
     },
-    start_timeline: StartTimelineSchema,
-    end_timeline: EndTimelineSchema,
+    income_start: StartTimelineSchema,
+    income_end: EndTimelineSchema,
+    goal_state: {
+      type: String,
+      trim: true,
+      required: false,
+    },
+    goals: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "goal",
+      default: [],
+    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",

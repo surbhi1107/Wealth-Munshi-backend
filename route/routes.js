@@ -63,6 +63,13 @@ const {
   getPartnerQuestionaries,
   updateQuestionaries,
 } = require("../controller/risk-profile");
+const {
+  addincome,
+  getincomebyid,
+  getallincomes,
+  updateincome,
+  deleteincome,
+} = require("../controller/income");
 const router = express.Router();
 
 router.post("/user/register", register);
@@ -126,5 +133,11 @@ router.post("/question/question-by-id", adminMiddleware, getquestionbyid);
 router.get("/question/get-all-questions", adminMiddleware, getallquestions);
 router.put("/question/update", adminMiddleware, updatequestion);
 router.post("/question/delete", adminMiddleware, deleteQuestion);
+
+router.post("/income/create", authMiddleware, addincome);
+router.post("/income/income-by-id", authMiddleware, getincomebyid);
+router.get("/income/get-all-incomes", authMiddleware, getallincomes);
+router.put("/income/update", authMiddleware, updateincome);
+router.post("/income/delete", authMiddleware, deleteincome);
 
 module.exports = router;
