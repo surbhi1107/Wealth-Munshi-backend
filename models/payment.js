@@ -46,8 +46,8 @@ var paymentSchema = new Schema(
       type: Number,
       require: false,
     },
-    payment_time: {
-      type: Date,
+    timeline: {
+      type: String,
       trim: true,
       require: false,
     },

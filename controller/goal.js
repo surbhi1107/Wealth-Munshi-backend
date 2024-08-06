@@ -83,7 +83,8 @@ const getgoalbyid = async (req, res, next) => {
         },
       },
     ]);
-    if (!goal) {
+    console.log(goal);
+    if (goal?.length === 0) {
       return res.status(400).send({ success, error: "Data not found" });
     }
     success = true;

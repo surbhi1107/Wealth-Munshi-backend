@@ -32,11 +32,6 @@ var liabilitySchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "familymember",
     },
-    payment_ids: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "payment",
-      default: [],
-    },
     isPaid: {
       type: Boolean,
       default: false,

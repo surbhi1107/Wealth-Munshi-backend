@@ -70,6 +70,13 @@ const {
   updateincome,
   deleteincome,
 } = require("../controller/income");
+const {
+  addliability,
+  getliabilitybyid,
+  getallliabilities,
+  updateliability,
+  deleteliability,
+} = require("../controller/liability");
 const router = express.Router();
 
 router.post("/user/register", register);
@@ -139,5 +146,11 @@ router.post("/income/income-by-id", authMiddleware, getincomebyid);
 router.get("/income/get-all-incomes", authMiddleware, getallincomes);
 router.put("/income/update", authMiddleware, updateincome);
 router.post("/income/delete", authMiddleware, deleteincome);
+
+router.post("/liability/create", authMiddleware, addliability);
+router.post("/liability/liability-by-id", authMiddleware, getliabilitybyid);
+router.get("/liability/get-all-liabilities", authMiddleware, getallliabilities);
+router.put("/liability/update", authMiddleware, updateliability);
+router.post("/liability/delete", authMiddleware, deleteliability);
 
 module.exports = router;
