@@ -173,7 +173,7 @@ const getliabilitybyid = async (req, res, next) => {
         },
       },
     ]);
-    if (!liability) {
+    if (liability?.length === 0) {
       return res.status(400).send({ success, error: "Data not found" });
     }
     success = true;
