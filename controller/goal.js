@@ -1,5 +1,6 @@
 const { mongoose } = require("mongoose");
 const Goal = require("../models/goal");
+const Asset = require("../models/asset");
 
 const addgoal = async (req, res, next) => {
   try {
@@ -33,6 +34,32 @@ const addgoal = async (req, res, next) => {
           .status(400)
           .send({ success, error: "Something went wrong." });
       }
+      let assetalltype = await Asset.find({
+        $or: [{ goal_state: "all" }, { surplusgoal_state: "all" }],
+      });
+      assetalltype = assetalltype.map((v) => {
+        let obj = { ...v?._doc };
+        if (obj?.goal_state === "all") {
+          obj = {
+            ...obj,
+            goals: [...obj?.goals, goal?._id],
+          };
+        }
+        if (obj?.surplusgoal_state === "all") {
+          obj = {
+            ...obj,
+            surplus_goals: [...obj?.surplus_goals, goal?._id],
+          };
+        }
+        return obj;
+      });
+      assetalltype?.map(async (v) => {
+        await Asset.findByIdAndUpdate(v?._id, {
+          $set: {
+            ...v,
+          },
+        });
+      });
       success = true;
       return res.send({ success, data: goal });
     } else {
@@ -83,7 +110,6 @@ const getgoalbyid = async (req, res, next) => {
         },
       },
     ]);
-    console.log(goal);
     if (goal?.length === 0) {
       return res.status(400).send({ success, error: "Data not found" });
     }
@@ -135,6 +161,24 @@ const deletegoal = async (req, res, next) => {
       return res.status(400).send({ success, msg: "Data Not Found" });
     }
     let deleted = await Goal.findByIdAndDelete(goalId);
+
+    let assetalltype = await Asset.find({
+      $or: [{ goal_state: "all" }, { surplusgoal_state: "all" }],
+    });
+    assetalltype = assetalltype.map(async (v) => {
+      let obj = { ...v?._doc };
+      obj = {
+        ...obj,
+        goals: obj?.goals?.filter((v) => `${v}` !== goalId),
+        surplus_goals: obj?.goals?.filter((v) => `${v}` !== goalId),
+      };
+      await Asset.findByIdAndUpdate(obj?._id, {
+        $set: {
+          ...obj,
+        },
+      });
+      return obj;
+    });
     if (!deleted?._id) {
       success = false;
       return res.status(500).send({ success, msg: "delete unsuccessfully" });

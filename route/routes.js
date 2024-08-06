@@ -77,6 +77,7 @@ const {
   updateliability,
   deleteliability,
 } = require("../controller/liability");
+const { getsummaryData } = require("../controller/summary");
 const router = express.Router();
 
 router.post("/user/register", register);
@@ -152,5 +153,7 @@ router.post("/liability/liability-by-id", authMiddleware, getliabilitybyid);
 router.get("/liability/get-all-liabilities", authMiddleware, getallliabilities);
 router.put("/liability/update", authMiddleware, updateliability);
 router.post("/liability/delete", authMiddleware, deleteliability);
+
+router.get("/summary/get-summary", authMiddleware, getsummaryData);
 
 module.exports = router;
