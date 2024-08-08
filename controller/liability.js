@@ -187,7 +187,7 @@ const getliabilitybyid = async (req, res, next) => {
 const updateliability = async (req, res, next) => {
   try {
     let liabilityId = req.body?.liabilityId;
-    let payment_details = req.body?.payment_details;
+    let payment_details = req.body?.details?.payment_details;
     let success = false;
     let { details } = req.body;
     if (!liabilityId || !details) {
@@ -209,51 +209,59 @@ const updateliability = async (req, res, next) => {
           .send({ success, error: "Something went wrong." });
       } else {
         if (payment_details) {
-          let newPayment = {
-            type: payment_details?.type,
-            name: payment_details?.name,
-            amount: payment_details?.amount,
-            inflation: payment_details?.inflation,
-            next_payment_start: payment_details?.next_payment_start,
-            next_payment_end: payment_details?.next_payment_end,
-            payment_time: payment_details?.payment_time,
-            isin_cashflow: payment_details?.isin_cashflow,
-            liability_id: updatedLiability?._id,
-            user_id: req.user._id,
-          };
-          let donePayment = await Payment.create({
-            ...newPayment,
+          payment_details?.map(async (pay) => {
+            let newPayment = {
+              type: pay?.type,
+              name: pay?.name,
+              amount: pay?.amount,
+              inflation: pay?.inflation,
+              next_payment_start: pay?.next_payment_start,
+              ...(pay?.next_payment_end?.value
+                ? {
+                    next_payment_end: {
+                      ...pay?.next_payment_end,
+                      member: new mongoose.Types.ObjectId(
+                        pay?.next_payment_end?.member
+                      ),
+                    },
+                  }
+                : {}),
+              payment_time: pay?.payment_time,
+              isin_cashflow: pay?.isin_cashflow,
+              liability_id: updatedLiability?._id,
+              user_id: req.user._id,
+            };
+            let findpayment = await Payment.findById(pay?._id);
+            if (findpayment?._id) {
+              await Payment.findByIdAndUpdate(pay?._id, {
+                $set: { ...newPayment },
+              });
+            } else
+              await Payment.create({
+                ...newPayment,
+              });
           });
-          if (!donePayment?._id) {
-            return res.status(400).send({
-              success,
-              data: { liability: updatedLiability },
-              error:
-                "Liability Updated but payment not added please try again later.",
-            });
-          } else {
-            let newLiability = await Liability.findByIdAndUpdate(liabilityId, {
-              $set: {
-                ...updatedLiability,
-                payment_ids: [
-                  ...updatedLiability.payment_ids,
-                  donePayment?._id,
-                ],
-              },
-            });
-            success = true;
-            return res.send({
-              success,
-              data: { liability: newLiability, payments: donePayment },
-            });
-          }
+          // if (!donePayment?._id) {
+          //   return res.status(400).send({
+          //     success,
+          //     data: { liability: updatedLiability },
+          //     error:
+          //       "Liability Updated but payment not added please try again later.",
+          //   });
+          // } else {
+          success = true;
+          return res.send({
+            success,
+            data: { liability: liability },
+          });
+          // }
         } else {
           success = true;
           res.status(200).send({ success });
         }
       }
     } else {
-      return res.status(400).send("Data Not Found");
+      return res.status(400).send({ success: false, error: "Data Not Found" });
     }
   } catch (error) {
     console.log("error", error);
@@ -275,7 +283,7 @@ const deleteliability = async (req, res, next) => {
       return v?._id;
     });
     if (!findLiability) {
-      return res.status(400).send({ success, msg: "Data Not Found" });
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
     let deleted = await Liability.findByIdAndDelete(liabilityId);
     let deletedpayments = await Payment.deleteMany({ _id: { $in: ids } });
@@ -311,7 +319,7 @@ const getallliabilities = async (req, res, next) => {
         },
       },
     ]);
-    return res.send({ data });
+    return res.send({ success: true, data });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ error: "Internal server error" });

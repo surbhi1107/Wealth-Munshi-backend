@@ -139,7 +139,7 @@ const updateincome = async (req, res, next) => {
       success = true;
       res.status(200).send({ success, msg: "data Updated successfully" });
     } else {
-      return res.status(400).send("Data Not Found");
+      return res.status(400).send({ success: false, error: "Data Not Found" });
     }
   } catch (error) {
     console.log("error", error);

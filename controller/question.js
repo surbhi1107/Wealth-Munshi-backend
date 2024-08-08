@@ -32,7 +32,9 @@ const addQuestion = async (req, res, next) => {
       success = true;
       return res.send({ success, data: que });
     } else {
-      return res.status(500).send("All fields are required");
+      return res
+        .status(500)
+        .send({ success: false, error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
@@ -84,7 +86,7 @@ const updatequestion = async (req, res, next) => {
       success = true;
       res.status(200).send({ success });
     } else {
-      return res.status(400).send("Data Not Found");
+      return res.status(400).send({ success: false, error: "Data Not Found" });
     }
   } catch (error) {
     console.log("error", error);
@@ -100,7 +102,7 @@ const deleteQuestion = async (req, res, next) => {
       $and: [{ _id: questionId }, { user_id: req.user?._id }],
     });
     if (!findQuestion) {
-      return res.status(400).send({ success, msg: "Data Not Found" });
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
     let deleted = await Question.findByIdAndDelete(questionId);
     if (!deleted?._id) {

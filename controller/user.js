@@ -5,6 +5,30 @@ const nodemailer = require("nodemailer");
 const Familymember = require("../models/familymember");
 const Partner = require("../models/partner");
 const Question = require("../models/question");
+const Expense = require("../models/expense");
+const UserExpense = require("../models/user-expense");
+
+const getAge = (dob, end_age) => {
+  // Convert the DOB string to a Date object
+  const birthDate = new Date(dob);
+  // Get today's date
+  const today = new Date();
+  // Calculate the age
+  let age = today.getFullYear() - birthDate.getFullYear();
+  // Adjust if the birthday hasn't occurred yet this year
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  // get left age
+  let years = end_age - age;
+  // Add years to today date
+  let newage = new Date().setFullYear(new Date().getFullYear() + years);
+  return new Date(newage)?.toISOString();
+};
 
 const register = async (req, res, next) => {
   try {
@@ -55,6 +79,131 @@ const register = async (req, res, next) => {
           return res
             .status(400)
             .send({ success, error: "Something went wrong." });
+        }
+        // add default expenses to user
+        if (dob?.length > 0) {
+          let findfixed = await Expense.find({ type: "fixed" })
+            .select("-_id")
+            .select("-createdAt")
+            .select("-updatedAt")
+            .select("-__v");
+          let finddiscretionary = await Expense.find({
+            type: "discretionary",
+          })
+            .select("-_id")
+            .select("-createdAt")
+            .select("-updatedAt")
+            .select("-__v");
+          findfixed = findfixed.map((v) => {
+            return {
+              ...v?._doc,
+              start_time: {
+                date: new Date().toISOString(),
+                value: 0,
+                type: "now",
+              },
+              end_time: {
+                date: new Date().toISOString(),
+                value: 0,
+                type: "now",
+              },
+            };
+          });
+          finddiscretionary = finddiscretionary.map((v) => {
+            return {
+              ...v,
+              start_time: {
+                date: new Date().toISOString(),
+                value: 0,
+                type: "now",
+              },
+              end_time: {
+                date: new Date().toISOString(),
+                value: 0,
+                type: "now",
+              },
+            };
+          });
+          let retire = age_retire ?? 65;
+          let age_retire_date = getAge(dob, retire);
+          let expectancy = life_expectancy ?? 85;
+          let sole_survivor_date = getAge(dob, expectancy - 4);
+          let life_expectancy_date = getAge(dob, expectancy);
+          let damiary = [
+            {
+              type: "estimated",
+              living_expense_type: "current",
+              amount: 0,
+              inflation: 0,
+              timeline: "year",
+              start_date: new Date(dob),
+              end_date: new Date(age_retire_date),
+              user_id: user?._id,
+              selected: true,
+            },
+            {
+              type: "breakdown",
+              living_expense_type: "current",
+              amount: 0,
+              inflation: 0,
+              timeline: "month",
+              start_date: new Date(dob),
+              end_date: new Date(age_retire_date),
+              fixed_expenses: [...findfixed],
+              discretionary_expenses: [...finddiscretionary],
+              user_id: user?._id,
+              selected: false,
+            },
+            {
+              type: "estimated",
+              living_expense_type: "retire",
+              amount: 0,
+              inflation: 6,
+              timeline: "year",
+              start_date: new Date(age_retire_date),
+              end_date: new Date(sole_survivor_date),
+              user_id: user?._id,
+              selected: true,
+            },
+            {
+              type: "breakdown",
+              living_expense_type: "retire",
+              amount: 0,
+              inflation: 0,
+              timeline: "month",
+              start_date: new Date(age_retire_date),
+              end_date: new Date(sole_survivor_date),
+              fixed_expenses: [...findfixed],
+              discretionary_expenses: [...finddiscretionary],
+              user_id: user?._id,
+              selected: false,
+            },
+            {
+              type: "estimated",
+              living_expense_type: "sole_survivor",
+              amount: 0,
+              inflation: 6,
+              timeline: "year",
+              start_date: new Date(sole_survivor_date),
+              end_date: new Date(life_expectancy_date),
+              user_id: user?._id,
+              selected: true,
+            },
+            {
+              type: "breakdown",
+              living_expense_type: "sole_survivor",
+              amount: 0,
+              inflation: 0,
+              timeline: "month",
+              start_date: new Date(sole_survivor_date),
+              end_date: new Date(life_expectancy_date),
+              fixed_expenses: [...findfixed],
+              discretionary_expenses: [...finddiscretionary],
+              user_id: user?._id,
+              selected: false,
+            },
+          ];
+          await UserExpense.insertMany([...damiary]);
         }
         //add question to partner collection
         let findquestions = await Question.find()
@@ -592,6 +741,132 @@ const updateuser = async (req, res, next) => {
       delete dummyuserdetails["phone_number"];
       delete dummyuserdetails["client_type"];
       delete dummyuserdetails["password"];
+      // add default expenses to user
+      let findexpense = await UserExpense.find({ user_id: userId });
+      if (findexpense?.length === 0 && dob?.length > 0) {
+        let findfixed = await Expense.find({ type: "fixed" })
+          .select("-_id")
+          .select("-createdAt")
+          .select("-updatedAt")
+          .select("-__v");
+        let finddiscretionary = await Expense.find({
+          type: "discretionary",
+        })
+          .select("-_id")
+          .select("-createdAt")
+          .select("-updatedAt")
+          .select("-__v");
+        findfixed = findfixed.map((v) => {
+          return {
+            ...v?._doc,
+            start_time: {
+              date: new Date().toISOString(),
+              value: 0,
+              type: "now",
+            },
+            end_time: {
+              date: new Date().toISOString(),
+              value: 0,
+              type: "now",
+            },
+          };
+        });
+        finddiscretionary = finddiscretionary.map((v) => {
+          return {
+            ...v,
+            start_time: {
+              date: new Date().toISOString(),
+              value: 0,
+              type: "now",
+            },
+            end_time: {
+              date: new Date().toISOString(),
+              value: 0,
+              type: "now",
+            },
+          };
+        });
+        let age_retire = userDetails?.age_retire ?? 65;
+        let age_retire_date = getAge(userDetails?.dob, age_retire);
+        let life_expectancy = userDetails?.life_expectancy ?? 85;
+        let sole_survivor_date = getAge(userDetails?.dob, life_expectancy - 4);
+        let life_expectancy_date = getAge(userDetails?.dob, life_expectancy);
+        let damiary = [
+          {
+            type: "estimated",
+            living_expense_type: "current",
+            amount: 0,
+            inflation: 0,
+            timeline: "year",
+            start_date: new Date(userDetails?.dob),
+            end_date: new Date(age_retire_date),
+            user_id: user?._id,
+            selected: true,
+          },
+          {
+            type: "breakdown",
+            living_expense_type: "current",
+            amount: 0,
+            inflation: 0,
+            timeline: "month",
+            start_date: new Date(userDetails?.dob),
+            end_date: new Date(age_retire_date),
+            fixed_expenses: [...findfixed],
+            discretionary_expenses: [...finddiscretionary],
+            user_id: user?._id,
+            selected: false,
+          },
+          {
+            type: "estimated",
+            living_expense_type: "retire",
+            amount: 0,
+            inflation: 6,
+            timeline: "year",
+            start_date: new Date(age_retire_date),
+            end_date: new Date(sole_survivor_date),
+            user_id: user?._id,
+            selected: true,
+          },
+          {
+            type: "breakdown",
+            living_expense_type: "retire",
+            amount: 0,
+            inflation: 0,
+            timeline: "month",
+            start_date: new Date(age_retire_date),
+            end_date: new Date(sole_survivor_date),
+            fixed_expenses: [...findfixed],
+            discretionary_expenses: [...finddiscretionary],
+            user_id: user?._id,
+            selected: false,
+          },
+          {
+            type: "estimated",
+            living_expense_type: "sole_survivor",
+            amount: 0,
+            inflation: 6,
+            timeline: "year",
+            start_date: new Date(sole_survivor_date),
+            end_date: new Date(life_expectancy_date),
+            user_id: user?._id,
+            selected: true,
+          },
+          {
+            type: "breakdown",
+            living_expense_type: "sole_survivor",
+            amount: 0,
+            inflation: 0,
+            timeline: "month",
+            start_date: new Date(sole_survivor_date),
+            end_date: new Date(life_expectancy_date),
+            fixed_expenses: [...findfixed],
+            discretionary_expenses: [...finddiscretionary],
+            user_id: user?._id,
+            selected: false,
+          },
+        ];
+        await UserExpense.insertMany([...damiary]);
+      }
       await Familymember.findOneAndUpdate(
         { $and: [{ user_id: req.user?._id }, { type: "self" }] },
         {

@@ -46,6 +46,11 @@ var savingSchema = new Schema(
       type: Number,
       require: false,
     },
+    timeline: {
+      type: String,
+      trim: true,
+      require: false,
+    },
     isin_cashflow: {
       type: Boolean,
       default: false,
@@ -59,8 +64,8 @@ var savingSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "asset",
     },
-    start_timeline: StartTimelineSchema,
-    end_timeline: EndTimelineSchema,
+    saving_start: StartTimelineSchema,
+    saving_end: EndTimelineSchema,
   },
   { timestamps: true }
 );

@@ -38,7 +38,9 @@ const addasset = async (req, res, next) => {
       success = true;
       return res.send({ success, data: asset });
     } else {
-      return res.status(500).send("All fields are required");
+      return res
+        .status(500)
+        .send({ success: false, error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
@@ -133,7 +135,7 @@ const updateasset = async (req, res, next) => {
       success = true;
       res.status(200).send({ success });
     } else {
-      return res.status(400).send("Data Not Found");
+      return res.status(400).send({ success: false, error: "Data Not Found" });
     }
   } catch (error) {
     console.log("error", error);
@@ -149,7 +151,7 @@ const deleteasset = async (req, res, next) => {
       $and: [{ _id: assetId }, { user_id: req.user?._id }],
     });
     if (!findAsset) {
-      return res.status(400).send({ success, msg: "Data Not Found" });
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
     let deleted = await Asset.findByIdAndDelete(assetId);
     if (!deleted?._id) {

@@ -78,6 +78,33 @@ const {
   deleteliability,
 } = require("../controller/liability");
 const { getsummaryData } = require("../controller/summary");
+const {
+  addsaving,
+  getsavingbyid,
+  deletesaving,
+  updatesaving,
+  getallsavings,
+} = require("../controller/saving");
+const {
+  addpayment,
+  getpaymentbyid,
+  getallpaymentsbyliability,
+  updatepayment,
+  deletepayment,
+} = require("../controller/payment");
+const {
+  addExpense,
+  getexpensebyid,
+  getallexpenses,
+  updateExpense,
+  deleteExpense,
+} = require("../controller/expense");
+const {
+  resetUserExpense,
+  updateUserExpense,
+  getuserexpensebyid,
+  getallUserExpenses,
+} = require("../controller/userExpense");
 const router = express.Router();
 
 router.post("/user/register", register);
@@ -154,6 +181,33 @@ router.get("/liability/get-all-liabilities", authMiddleware, getallliabilities);
 router.put("/liability/update", authMiddleware, updateliability);
 router.post("/liability/delete", authMiddleware, deleteliability);
 
+router.post("/saving/create", authMiddleware, addsaving);
+router.post("/saving/saving-by-id", authMiddleware, getsavingbyid);
+router.get("/saving/get-all-savings", authMiddleware, getallsavings);
+router.put("/saving/update", authMiddleware, updatesaving);
+router.post("/saving/delete", authMiddleware, deletesaving);
+
+router.post("/payment/create", authMiddleware, addpayment);
+router.post("/payment/payment-by-id", authMiddleware, getpaymentbyid);
+router.get(
+  "/payment/get-all-payments",
+  authMiddleware,
+  getallpaymentsbyliability
+);
+router.put("/payment/update", authMiddleware, updatepayment);
+router.post("/payment/delete", authMiddleware, deletepayment);
+
 router.get("/summary/get-summary", authMiddleware, getsummaryData);
+
+router.post("/expense/create", authMiddleware, addExpense);
+router.post("/expense/expense-by-id", authMiddleware, getexpensebyid);
+router.get("/expense/get-all-expenses", authMiddleware, getallexpenses);
+router.put("/expense/update", authMiddleware, updateExpense);
+router.post("/expense/delete", authMiddleware, deleteExpense);
+
+router.post("/user-expense/get-all", authMiddleware, getallUserExpenses);
+router.post("/user-expense/expense-by-id", authMiddleware, getuserexpensebyid);
+router.put("/user-expense/update", authMiddleware, updateUserExpense);
+router.post("/user-expense/reset", authMiddleware, resetUserExpense);
 
 module.exports = router;

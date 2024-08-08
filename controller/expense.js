@@ -1,41 +1,31 @@
-const Familymember = require("../models/familymember");
+const Expense = require("../models/expense");
 
-const addmember = async (req, res, next) => {
+const addExpense = async (req, res, next) => {
   try {
-    let {
-      type,
-      title,
-      fname,
-      mname,
-      lname,
-      gender,
-      known_as,
-      dob,
-      age_retire,
-      life_expectancy,
-    } = req?.body;
+    let { type, name, amount, inflation, isInflation, timeline } = req?.body;
     let success = false;
-    if (fname && lname) {
-      let member = await Familymember.create({
-        type,
-        title,
-        fname,
-        mname,
-        lname,
-        gender,
-        known_as,
-        dob,
-        age_retire,
-        life_expectancy,
-        user_id: req.user._id,
+    if (type && name) {
+      let find = await Expense.findOne({
+        $and: [{ type: type }, { name: name }],
       });
-      if (!member?._id) {
+      if (find?._id) {
+        return res.status(400).send({ success, error: "Data already exists." });
+      }
+      let data = await Expense.create({
+        type,
+        name,
+        amount,
+        inflation,
+        isInflation,
+        timeline,
+      });
+      if (!data?._id) {
         return res
           .status(400)
           .send({ success, error: "Something went wrong." });
       }
       success = true;
-      return res.send({ success, data: member });
+      return res.send({ success, data: data });
     } else {
       return res
         .status(500)
@@ -47,45 +37,41 @@ const addmember = async (req, res, next) => {
   }
 };
 
-const getmemberbyid = async (req, res, next) => {
+const getexpensebyid = async (req, res, next) => {
   try {
-    let memberId = req.body?.memberId;
+    let expenseId = req.body?.expenseId;
     let success = false;
-    if (!memberId) {
+    if (!expenseId) {
       return res
         .status(500)
         .send({ success, error: "All fields are required" });
     }
-    let member = await Familymember.findOne({
-      $and: [{ _id: memberId }, { user_id: req.user?._id }],
-    });
-    if (!member) {
+    let data = await Expense.findById(expenseId);
+    if (!data) {
       return res.status(400).send({ success, error: "Data not found" });
     }
     success = true;
-    return res.send({ success, data: member });
+    return res.send({ success, data: data });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ error: "Internal server error" });
   }
 };
 
-const updatemember = async (req, res, next) => {
+const updateExpense = async (req, res, next) => {
   try {
-    let memberId = req.body?.memberId;
+    let expenseId = req.body?.expenseId;
     let success = false;
     let { details } = req.body;
-    if (!memberId || !details) {
+    if (!expenseId || !details) {
       return res
         .status(500)
         .send({ success, error: "All fields are required" });
     }
     details = { ...details, user_id: req.user._id };
-    const member = await Familymember.findOne({
-      $and: [{ _id: memberId }, { user_id: req.user?._id }],
-    });
-    if (member) {
-      await Familymember.findByIdAndUpdate(memberId, {
+    const data = await Expense.findById(expenseId);
+    if (data) {
+      await Expense.findByIdAndUpdate(expenseId, {
         $set: details,
       });
       success = true;
@@ -99,17 +85,15 @@ const updatemember = async (req, res, next) => {
   }
 };
 
-const deletemember = async (req, res, next) => {
+const deleteExpense = async (req, res, next) => {
   try {
-    const memberId = req.body?.memberId;
+    const expenseId = req.body?.expenseId;
     let success = false;
-    const findmember = Familymember.findOne({
-      $and: [{ _id: memberId }, { user_id: req.user?._id }],
-    });
-    if (!findmember) {
-      return res.status(400).send({ success: false, error: "Data Not Found" });
+    const findQuestion = await Expense.findById(expenseId);
+    if (!findQuestion) {
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
-    let deleted = await Familymember.findByIdAndDelete(memberId);
+    let deleted = await Expense.findByIdAndDelete(expenseId);
     if (!deleted?._id) {
       success = false;
       return res.status(500).send({ success, msg: "delete unsuccessfully" });
@@ -122,10 +106,10 @@ const deletemember = async (req, res, next) => {
   }
 };
 
-const getallmembers = async (req, res, next) => {
+const getallexpenses = async (req, res, next) => {
   try {
-    let data = await Familymember.find({ user_id: req.user?._id });
-    return res.send({ success: true, data });
+    let data = await Expense.find();
+    return res.send({ data });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ error: "Internal server error" });
@@ -133,9 +117,9 @@ const getallmembers = async (req, res, next) => {
 };
 
 module.exports = {
-  addmember,
-  updatemember,
-  getmemberbyid,
-  deletemember,
-  getallmembers,
+  addExpense,
+  updateExpense,
+  getexpensebyid,
+  deleteExpense,
+  getallexpenses,
 };

@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Saving = require("../models/saving");
 
 const addsaving = async (req, res, next) => {
@@ -8,21 +9,23 @@ const addsaving = async (req, res, next) => {
       amount,
       inflation,
       isin_cashflow,
-      start_timeline,
-      end_timeline,
+      timeline,
+      saving_start,
+      saving_end,
       asset_id,
     } = req?.body;
     let success = false;
-    if (type && start_timeline?.date && end_timeline?.date) {
+    if (type && amount) {
       let saving = await Saving.create({
         type,
         name,
         amount,
         inflation,
         isin_cashflow,
-        start_timeline,
-        end_timeline,
-        asset_id,
+        saving_start,
+        saving_end,
+        timeline,
+        ...(asset_id?.length > 0 ? { asset_id: asset_id } : {}),
         user_id: req.user._id,
       });
       if (!saving?._id) {
@@ -33,7 +36,9 @@ const addsaving = async (req, res, next) => {
       success = true;
       return res.send({ success, data: saving });
     } else {
-      return res.status(500).send("All fields are required");
+      return res
+        .status(500)
+        .send({ success: false, error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
@@ -51,21 +56,42 @@ const getsavingbyid = async (req, res, next) => {
         .send({ success, error: "All fields are required" });
     }
     let saving = await Saving.aggregate([
-      { $and: [{ _id: savingId }, { user_id: req.user?._id }] },
+      { $match: { $and: [{ _id: new mongoose.Types.ObjectId(savingId) }] } },
       {
         $lookup: {
           from: "asset",
           localField: "asset_id",
           foreignField: "_id",
-          as: "asset_id",
+          as: "asset",
         },
       },
       {
         $lookup: {
           from: "familymember",
-          localField: "user_recommended",
+          localField: "saving_start.member",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymember",
+          localField: "saving_end.member",
+          foreignField: "_id",
+          as: "end_member",
+        },
+      },
+      {
+        $addFields: {
+          asset: {
+            $first: "$assets",
+          },
+          start_member: {
+            $first: "$start_member",
+          },
+          end_member: {
+            $first: "$end_member",
+          },
         },
       },
     ]);
@@ -101,7 +127,7 @@ const updatesaving = async (req, res, next) => {
       success = true;
       res.status(200).send({ success });
     } else {
-      return res.status(400).send("Data Not Found");
+      return res.status(400).send({ success: false, error: "Data Not Found" });
     }
   } catch (error) {
     console.log("error", error);
@@ -117,7 +143,7 @@ const deletesaving = async (req, res, next) => {
       $and: [{ _id: savingId }, { user_id: req.user?._id }],
     });
     if (!findSaving) {
-      return res.status(400).send({ success, msg: "Data Not Found" });
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
     let deleted = await Saving.findByIdAndDelete(savingId);
     if (!deleted?._id) {
@@ -138,22 +164,60 @@ const getallsavings = async (req, res, next) => {
       { $match: { user_id: req.user._id } },
       {
         $lookup: {
-          from: "asset",
+          from: "assets",
           localField: "asset_id",
           foreignField: "_id",
-          as: "asset_id",
+          as: "asset",
+          pipeline: [
+            {
+              $lookup: {
+                from: "familymembers",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+              },
+            },
+            {
+              $addFields: {
+                owner: {
+                  $first: "$owner",
+                },
+              },
+            },
+          ],
         },
       },
       {
         $lookup: {
           from: "familymember",
-          localField: "user_recommended",
+          localField: "saving_start.member",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "start_member",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymember",
+          localField: "saving_end.member",
+          foreignField: "_id",
+          as: "end_member",
+        },
+      },
+      {
+        $addFields: {
+          asset: {
+            $first: "$asset",
+          },
+          start_member: {
+            $first: "$start_member",
+          },
+          end_member: {
+            $first: "$end_member",
+          },
         },
       },
     ]);
-    return res.send({ data });
+    return res.send({ success: true, data });
   } catch (error) {
     console.log("error", error);
     return res.status(500).send({ error: "Internal server error" });

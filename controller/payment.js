@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Liability = require("../models/liability");
 const Payment = require("../models/payment");
 
@@ -15,7 +16,7 @@ const addpayment = async (req, res, next) => {
       liability_id,
     } = req?.body;
     let success = false;
-    if (type && next_payment_start?.date && next_payment_end?.date) {
+    if (type && amount && next_payment_start?.date) {
       let payment = await Payment.create({
         type,
         name,
@@ -25,7 +26,7 @@ const addpayment = async (req, res, next) => {
         next_payment_end,
         payment_time,
         isin_cashflow,
-        liability_id,
+        ...(liability_id?.length > 0 ? { liability_id: liability_id } : {}),
         user_id: req.user._id,
       });
       if (!payment?._id) {
@@ -33,20 +34,27 @@ const addpayment = async (req, res, next) => {
           .status(400)
           .send({ success, error: "Something went wrong." });
       }
-      const liability = await Liability.findOne({
-        $and: [{ _id: liability_id }, { user_id: req.user?._id }],
-      });
-      let newLiability = await Liability.findByIdAndUpdate(liability?._id, {
-        $set: {
-          ...liability,
-          payment_ids: [...liability.payment_ids, payment?._id],
-        },
-      });
-      console.log("newLiability..", newLiability);
-      success = true;
-      return res.send({ success, data: payment });
+      if (liability_id?.length > 0) {
+        const liability = await Liability.findOne({
+          $and: [{ _id: liability_id }, { user_id: req.user?._id }],
+        });
+        let newpayids = liability.payment_ids ?? [];
+        let newLiability = await Liability.findByIdAndUpdate(liability?._id, {
+          $set: {
+            ...liability,
+            payment_ids: [...newpayids, payment?._id],
+          },
+        });
+        success = true;
+        return res.send({ success, data: payment });
+      } else {
+        success = true;
+        return res.send({ success, data: payment });
+      }
     } else {
-      return res.status(500).send("All fields are required");
+      return res
+        .status(500)
+        .send({ success, error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
@@ -64,24 +72,53 @@ const getpaymentbyid = async (req, res, next) => {
         .send({ success, error: "All fields are required" });
     }
     let payment = await Payment.aggregate([
-      { $and: [{ _id: paymentId }, { user_id: req.user?._id }] },
       {
-        $lookup: {
-          from: "liability",
-          localField: "liability_id",
-          foreignField: "_id",
-          as: "liability_id",
+        $match: {
+          $and: [
+            { _id: new mongoose.Types.ObjectId(paymentId) },
+            { user_id: req.user?._id },
+          ],
         },
       },
       {
         $lookup: {
-          from: "familymember",
-          localField: "user_recommended",
+          from: "liabilities",
+          localField: "liability_id",
           foreignField: "_id",
-          as: "user_recommended",
+          as: "liability",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "next_payment_start.member",
+          foreignField: "_id",
+          as: "next_payment_start.member",
+        },
+      },
+      {
+        $lookup: {
+          from: "familymembers",
+          localField: "next_payment_end.member",
+          foreignField: "_id",
+          as: "next_payment_end.member",
+        },
+      },
+      {
+        $addFields: {
+          liability: {
+            $first: "$liability",
+          },
+          "next_payment_start.member": {
+            $first: "$next_payment_start.member",
+          },
+          "next_payment_end.member": {
+            $first: "$next_payment_end.member",
+          },
         },
       },
     ]);
+    console.log(paymentId);
     if (!payment) {
       return res.status(400).send({ success, error: "Data not found" });
     }
@@ -114,7 +151,7 @@ const updatepayment = async (req, res, next) => {
       success = true;
       res.status(200).send({ success });
     } else {
-      return res.status(400).send("Data Not Found");
+      return res.status(400).send({ success: false, error: "Data Not Found" });
     }
   } catch (error) {
     console.log("error", error);
@@ -130,23 +167,13 @@ const deletepayment = async (req, res, next) => {
       $and: [{ _id: paymentId }, { user_id: req.user?._id }],
     });
     if (!findPayment) {
-      return res.status(400).send({ success, msg: "Data Not Found" });
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
     let deleted = await Payment.findByIdAndDelete(paymentId);
     if (!deleted?._id) {
       success = false;
       return res.status(500).send({ success, msg: "delete unsuccessfully" });
     }
-    const liability = await Liability.findById(findPayment?.liability_id);
-    let newPaymentIds = [...liability.payment_ids];
-    newPaymentIds = newPaymentIds.filter((id) => id !== paymentId);
-    let newLiability = await Liability.findByIdAndUpdate(liability?._id, {
-      $set: {
-        ...liability,
-        payment_ids: [...newPaymentIds],
-      },
-    });
-    console.log("newLiability..", newLiability);
     success = true;
     return res.send({ success, msg: "delete successfully" });
   } catch (error) {
@@ -161,18 +188,34 @@ const getallpaymentsbyliability = async (req, res, next) => {
       { $match: { user_id: req.user._id } },
       {
         $lookup: {
-          from: "liability",
+          from: "liabilities",
           localField: "liability_id",
           foreignField: "_id",
-          as: "liability_id",
+          as: "liability",
+          pipeline: [
+            {
+              $lookup: {
+                from: "familymembers",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+              },
+            },
+            {
+              $addFields: {
+                owner: {
+                  $first: "$owner",
+                },
+              },
+            },
+          ],
         },
       },
       {
-        $lookup: {
-          from: "familymember",
-          localField: "user_recommended",
-          foreignField: "_id",
-          as: "user_recommended",
+        $addFields: {
+          liability: {
+            $first: "$liability",
+          },
         },
       },
     ]);

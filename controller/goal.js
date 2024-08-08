@@ -63,7 +63,9 @@ const addgoal = async (req, res, next) => {
       success = true;
       return res.send({ success, data: goal });
     } else {
-      return res.status(500).send("All fields are required");
+      return res
+        .status(500)
+        .send({ success: false, error: "All fields are required" });
     }
   } catch (error) {
     console.log("error", error);
@@ -142,7 +144,7 @@ const updategoal = async (req, res, next) => {
       success = true;
       res.status(200).send({ success });
     } else {
-      return res.status(400).send("Data Not Found");
+      return res.status(400).send({ success: false, error: "Data Not Found" });
     }
   } catch (error) {
     console.log("error", error);
@@ -158,7 +160,7 @@ const deletegoal = async (req, res, next) => {
       $and: [{ _id: goalId }, { user_id: req.user?._id }],
     });
     if (!findGoal) {
-      return res.status(400).send({ success, msg: "Data Not Found" });
+      return res.status(400).send({ success, error: "Data Not Found" });
     }
     let deleted = await Goal.findByIdAndDelete(goalId);
 
